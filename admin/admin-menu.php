@@ -133,3 +133,17 @@ add_action('admin_init', 'oopos_connector_register_settings');
 function oopos_connector_register_settings() {
     register_setting('oopos_connector_settings', 'oopos_connector_data');
 }
+
+
+add_action('wp_ajax_save_selected_shops_option', 'save_selected_shops_option_callback');
+function save_selected_shops_option_callback() {
+    check_ajax_referer('wt_iew_nonce', '_wpnonce');
+
+    if (isset($_POST['selected_shops']) && is_array($_POST['selected_shops'])) {
+        // Save the array as an option
+        update_option('oopos-shops-selected', $_POST['selected_shops']);
+        wp_send_json_success('Selected shops saved!');
+    } else {
+        wp_send_json_error('No shops received.');
+    }
+}

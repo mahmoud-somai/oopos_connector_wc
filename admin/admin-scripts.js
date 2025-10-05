@@ -97,11 +97,20 @@ document.addEventListener('DOMContentLoaded', function() {
         step2.style.display = 'none';
         step1.style.display = 'block';
     });
+document.getElementById('to-step3').addEventListener('click', () => {
+    step2.style.display = 'none';
+    step3.style.display = 'block';
 
-    document.getElementById('to-step3').addEventListener('click', () => {
-        step2.style.display = 'none';
-        step3.style.display = 'block';
+    // Send selected shops to server via AJAX
+    jQuery.post(wt_iew_ajax.ajax_url, {
+        action: 'save_selected_shops_option',
+        selected_shops: selected_shops, // the array
+        _wpnonce: wt_iew_ajax.nonce
+    }, function(response) {
+        console.log('Save selected shops response:', response);
     });
+});
+
 
     document.getElementById('back-step2').addEventListener('click', () => {
         step3.style.display = 'none';
