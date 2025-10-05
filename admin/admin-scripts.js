@@ -49,21 +49,26 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Helper: build options for a select from an array of shop names
-    function buildOptionsFor(selectEl, optionsArray, includePlaceholder = true) {
-        selectEl.innerHTML = '';
-        if (includePlaceholder) {
-            const ph = document.createElement('option');
-            ph.value = '';
-            ph.textContent = '-- Choose --';
-            selectEl.appendChild(ph);
-        }
-        optionsArray.forEach(s => {
-            const opt = document.createElement('option');
-            opt.value = s;
-            opt.textContent = s;
-            selectEl.appendChild(opt);
-        });
+function buildOptionsFor(selectEl, optionsArray, includePlaceholder = true) {
+    if (!selectEl) {
+        console.error('buildOptionsFor: select element is null!', selectEl);
+        return;
     }
+    selectEl.innerHTML = '';
+    if (includePlaceholder) {
+        const ph = document.createElement('option');
+        ph.value = '';
+        ph.textContent = '-- Choose --';
+        selectEl.appendChild(ph);
+    }
+    optionsArray.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        selectEl.appendChild(opt);
+    });
+}
+
 
     // Helper: return array of currently selected extra shops (non-empty values)
     function getSelectedExtras() {
