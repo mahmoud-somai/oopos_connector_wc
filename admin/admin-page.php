@@ -82,6 +82,14 @@ function oopos_connector_page() {
                 </option>
             <?php endforeach; ?>
         </select><br><br>
+        <script>
+jQuery(document).ready(function($){
+    $('#extra-shops').select2({
+        placeholder: "Choose extra shops",
+        allowClear: true
+    });
+});
+</script>
 
     <?php else : ?>
         <p style="color:red;">⚠️ No shops found. Please test the connection first.</p>
