@@ -71,17 +71,17 @@ function oopos_connector_page() {
         <!-- Container for Extra Shops -->
         <div id="extra-shops-container"></div>
 
-        <!-- Add Shop Button (hidden initially) -->
-        <button type="button" id="add-extra-shop" style="display:none;">+ Add another shop</button><br><br>
+        <!-- Add Shop Button -->
+        <button type="button" id="add-extra-shop" class="button" style="display:none;">+ Add another shop</button>
 
     <?php else : ?>
         <p style="color:red;">⚠️ No shops found. Please test the connection first.</p>
     <?php endif; ?>
 
+    <br><br>
     <button type="button" id="back-step1">Previous</button>
     <button type="button" id="to-step3">Next</button>
 </div>
-
 
 
                 <!-- Step 3 -->

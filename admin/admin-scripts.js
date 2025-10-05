@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Elements (step panels)
+    // Steps
     const step1 = document.getElementById('step1');
     const step2 = document.getElementById('step2');
     const step3 = document.getElementById('step3');
 
-    // Step1 inputs & UI
+    // Step1 inputs
     const domainInput = document.getElementById('domain');
     const enseigneInput = document.getElementById('enseigne');
     const apiKeyInput = document.getElementById('api_key');
@@ -15,117 +15,100 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const nextButton = document.getElementById('to-step2');
 
-    // Data
-    let allShops = [];            // full list of shops (strings)
-    let selected_shops = [];      // [ main, extra1, extra2, ... ]
+    // Shops data
+    let allShops = [];            // All available shops
+    let selected_shops = [];      // [main, extra1, extra2...]
 
-    // Ensure container/button exist (create if missing)
+    // Extra shops container
     let extraContainer = document.getElementById('extra-shops-container');
     if (!extraContainer) {
         extraContainer = document.createElement('div');
         extraContainer.id = 'extra-shops-container';
-        // try to insert after the main shop select (if exists) else append to step2
-        const step2Node = document.getElementById('step2') || null;
-        if (step2Node) step2Node.insertBefore(extraContainer, step2Node.querySelector('#back-step1') || null);
-        else document.body.appendChild(extraContainer);
+        step2.insertBefore(extraContainer, step2.querySelector('#back-step1') || null);
     }
 
+    // Add button
     let addBtn = document.getElementById('add-extra-shop');
     if (!addBtn) {
         addBtn = document.createElement('button');
         addBtn.type = 'button';
         addBtn.id = 'add-extra-shop';
-        addBtn.textContent = 'Add another shop';
-        addBtn.style.display = 'none'; // hidden by default, shown when main selected
-        // insert after container
+        addBtn.textContent = '+ Add another shop';
+        addBtn.style.display = 'none';
         extraContainer.parentNode.insertBefore(addBtn, extraContainer.nextSibling);
     }
 
-    // Find main shop select (should exist in your PHP)
     const mainSelect = document.querySelector('select[name="oopos_connector_data[main_shop]"]');
     if (!mainSelect) {
-        console.error('Main shop select not found: expected select[name="oopos_connector_data[main_shop]"]');
+        console.error('Main shop select not found');
         return;
     }
 
-    // Helper: build options for a select from an array of shop names
-function buildOptionsFor(selectEl, optionsArray, includePlaceholder = true) {
-    if (!selectEl) {
-        console.error('buildOptionsFor: select element is null!', selectEl);
-        return;
-    }
-    selectEl.innerHTML = '';
-    if (includePlaceholder) {
-        const ph = document.createElement('option');
-        ph.value = '';
-        ph.textContent = '-- Choose --';
-        selectEl.appendChild(ph);
-    }
-    optionsArray.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s;
-        opt.textContent = s;
-        selectEl.appendChild(opt);
-    });
-}
+    let extraCount = 0;
 
+    // Helper: build select options
+    function buildOptionsFor(selectEl, optionsArray) {
+        if (!selectEl) return;
+        selectEl.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = '-- Choose --';
+        selectEl.appendChild(placeholder);
 
-    // Helper: return array of currently selected extra shops (non-empty values)
+        optionsArray.forEach(optValue => {
+            const opt = document.createElement('option');
+            opt.value = optValue;
+            opt.textContent = optValue;
+            selectEl.appendChild(opt);
+        });
+    }
+
+    // Get currently selected extra shops
     function getSelectedExtras() {
         return Array.from(extraContainer.querySelectorAll('select.extra-shop-select'))
             .map(s => s.value)
-            .filter(v => v && v.length);
+            .filter(v => v);
     }
 
-    // Recalculate selected_shops and log it
-    function updateSelectedShopsAndLog() {
+    // Update selected_shops array
+    function updateSelectedShops() {
         const main = mainSelect.value || '';
         const extras = getSelectedExtras();
         selected_shops = [];
         if (main) selected_shops.push(main);
         selected_shops.push(...extras);
-        console.log('selected_shops:', selected_shops);
+        console.log('Selected shops:', selected_shops);
     }
 
-    
-
-    // Update all extra selects options to exclude main and other selected extras
+    // Refresh extra selects to remove already selected shops
     function refreshAllExtraSelects() {
         const main = mainSelect.value || '';
-        const extras = getSelectedExtras(); // current selected extras
+        const extras = getSelectedExtras();
         const extraSelects = Array.from(extraContainer.querySelectorAll('select.extra-shop-select'));
 
-        extraSelects.forEach((sel) => {
+        extraSelects.forEach(sel => {
             const currentValue = sel.value;
-            // compute options allowed for this specific select:
-            // allowed = allShops minus main minus (extras selected in other selects)
-            const otherSelected = extras.filter(v => v !== currentValue); // values used by others
+            const otherSelected = extras.filter(v => v !== currentValue);
             const allowed = allShops.filter(s => s && s !== main && !otherSelected.includes(s));
-            buildOptionsFor(sel, allowed, true);
+            buildOptionsFor(sel, allowed);
 
-            // re-set the previous value if still present
             if (currentValue && allowed.includes(currentValue)) {
                 sel.value = currentValue;
             } else {
-                // keep empty - if previous value lost (e.g. main changed), clear it
                 sel.value = '';
             }
         });
     }
 
-    // Add a new extra shop select (button handler)
-    let extraCount = 0;
+    // Add a new extra shop select
     function addExtraSelect() {
-        const main = mainSelect.value;
-        if (!main) {
+        if (!mainSelect.value) {
             alert('Please select a main shop first.');
             return;
         }
 
-        // available shops = allShops - main - selected extras
-        const used = new Set([ main, ...getSelectedExtras() ]);
+        const used = new Set([mainSelect.value, ...getSelectedExtras()]);
         const avail = allShops.filter(s => s && !used.has(s));
-
         if (avail.length === 0) {
             alert('No more shops available to add.');
             return;
@@ -144,153 +127,100 @@ function buildOptionsFor(selectEl, optionsArray, includePlaceholder = true) {
         const sel = document.createElement('select');
         sel.name = `oopos_connector_data[extra_shop_${extraCount}]`;
         sel.className = 'extra-shop-select';
-        // build allowed options for this new select
-        buildOptionsFor(sel, avail, true);
+        buildOptionsFor(sel, avail);
         wrapper.appendChild(sel);
         wrapper.appendChild(document.createElement('br'));
 
-        // remove button
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
         removeBtn.textContent = 'Remove';
         removeBtn.style.marginBottom = '8px';
-        wrapper.appendChild(removeBtn);
-
-        extraContainer.appendChild(wrapper);
-
-        // event: when select value changes, refresh others and log
-        sel.addEventListener('change', function () {
-            console.log('Extra select changed:', this.value);
-            refreshAllExtraSelects();
-            updateSelectedShopsAndLog();
-        });
-
-        // event: remove row
-        removeBtn.addEventListener('click', function () {
+        removeBtn.addEventListener('click', () => {
             wrapper.remove();
             refreshAllExtraSelects();
-            updateSelectedShopsAndLog();
-            // show add button if previously disabled
-            if (addBtn.style.display === 'none' && mainSelect.value) addBtn.style.display = 'inline-block';
+            updateSelectedShops();
+        });
+        wrapper.appendChild(removeBtn);
+
+        sel.addEventListener('change', () => {
+            refreshAllExtraSelects();
+            updateSelectedShops();
         });
 
-        // after adding, update selected_shops
-        updateSelectedShopsAndLog();
-
-        // If no more available after adding, optionally disable add button
-        const newAvail = allShops.filter(s => s && s !== main && !getSelectedExtras().includes(s));
-        if (newAvail.length === 0) {
-            addBtn.disabled = true;
-        } else {
-            addBtn.disabled = false;
-        }
-
-        console.log('Added extra select, avail now:', newAvail);
+        extraContainer.appendChild(wrapper);
+        updateSelectedShops();
+        refreshAllExtraSelects();
     }
 
-    // Main select change: show/hide add button and refresh extras
-mainSelect.addEventListener('change', function () {
-    const v = this.value;
-    console.log('Main shop selected:', v);
-
-    if (v) {
-        addBtn.style.display = 'inline-block'; // show the button
-        addBtn.disabled = false;
-    } else {
-        addBtn.style.display = 'none';
-    }
-
-    refreshAllExtraSelects();
-    updateSelectedShopsAndLog();
-});
-
-
-    // Add button click
-    addBtn.addEventListener('click', function () {
-        console.log('Add another shop clicked');
-        addExtraSelect();
+    // Show add button when main shop selected
+    mainSelect.addEventListener('change', () => {
+        addBtn.style.display = mainSelect.value ? 'inline-block' : 'none';
+        refreshAllExtraSelects();
+        updateSelectedShops();
     });
 
-    // When you go to Step 2 we must populate shops (AJAX or from existing options)
-    // If you already populate mainSelect server-side, read from it; otherwise request via AJAX.
+    // Add button click
+    addBtn.addEventListener('click', addExtraSelect);
+
+    // Load shops from existing options or AJAX
     function loadShopsIfNeeded(callback) {
-        // If mainSelect already has shop options (besides placeholder), read them
-        const existingOptions = Array.from(mainSelect.options).map(opt => opt.value).filter(v => v && v.length);
+        const existingOptions = Array.from(mainSelect.options).map(opt => opt.value).filter(v => v);
         if (existingOptions.length > 0) {
             allShops = existingOptions.slice();
-            console.log('Loaded shops from DOM:', allShops);
-            if (typeof callback === 'function') callback();
+            if (callback) callback();
             return;
         }
 
-        // else call AJAX to fetch shops
-        console.log('Fetching shops via AJAX...');
+        // AJAX fetch example (requires wp_localize_script)
         jQuery.post(wt_iew_ajax.ajax_url, {
             action: 'oopos_get_shops',
             _wpnonce: wt_iew_ajax.nonce
         }, function (response) {
-            console.log('oopos_get_shops response:', response);
             if (response && response.success && Array.isArray(response.data)) {
                 allShops = response.data.slice();
-                // populate mainSelect
-                buildOptionsFor(mainSelect, allShops, true);
-                console.log('Loaded shops from AJAX:', allShops);
-                if (typeof callback === 'function') callback();
-            } else {
-                console.error('Failed to load shops from AJAX', response);
+                buildOptionsFor(mainSelect, allShops);
+                if (callback) callback();
             }
         });
     }
 
-    // Hook: when user clicks Next to go to Step2 we will load shops if needed
+    // Step navigation
     const toStep2Btn = document.getElementById('to-step2');
     if (toStep2Btn) {
-        toStep2Btn.addEventListener('click', function () {
-            // show step2 (your existing logic may already do this)
+        toStep2Btn.addEventListener('click', () => {
             if (step1) step1.style.display = 'none';
             if (step2) step2.style.display = 'block';
 
-            // load shops then initialize UI state
-            loadShopsIfNeeded(function () {
-                // After shops are loaded we must:
-                // - hide add button initially (it appears when main selected)
-                addBtn.style.display = mainSelect.value ? 'inline-block' : 'none';
-                // - make sure extra container empties
-                // don't remove existing extras if you prefer to keep them; here we clear
+            loadShopsIfNeeded(() => {
                 extraContainer.innerHTML = '';
-                // reset counters/state
                 extraCount = 0;
-                updateSelectedShopsAndLog();
+                addBtn.style.display = mainSelect.value ? 'inline-block' : 'none';
                 refreshAllExtraSelects();
+                updateSelectedShops();
             });
         });
     }
 
-    // Back/Next navigation (keep your existing handlers too)
     const backStep1 = document.getElementById('back-step1');
     if (backStep1) backStep1.addEventListener('click', () => {
-        if (step2) step2.style.display = 'none';
-        if (step1) step1.style.display = 'block';
+        step2.style.display = 'none';
+        step1.style.display = 'block';
     });
 
     const toStep3 = document.getElementById('to-step3');
     if (toStep3) toStep3.addEventListener('click', () => {
-        if (step2) step2.style.display = 'none';
-        if (step3) step3.style.display = 'block';
+        step2.style.display = 'none';
+        step3.style.display = 'block';
     });
 
     const backStep2 = document.getElementById('back-step2');
     if (backStep2) backStep2.addEventListener('click', () => {
-        if (step3) step3.style.display = 'none';
-        if (step2) step2.style.display = 'block';
+        step3.style.display = 'none';
+        step2.style.display = 'block';
     });
 
-    // Initial: hide add button until main chosen
+    // Initial state
     addBtn.style.display = mainSelect.value ? 'inline-block' : 'none';
-    // if shop options already exist, load them into allShops
-    const initialOpts = Array.from(mainSelect.options).map(o => o.value).filter(v => v && v.length);
-    if (initialOpts.length) {
-        allShops = initialOpts;
-        refreshAllExtraSelects();
-    }
+    allShops = Array.from(mainSelect.options).map(o => o.value).filter(v => v);
+    refreshAllExtraSelects();
 });
