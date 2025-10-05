@@ -18,9 +18,9 @@ add_action('wp_ajax_wt_iew_test_connection', 'wt_iew_test_connection');
 function wt_iew_test_connection() {
     check_ajax_referer('wt_iew_nonce');
 
-    $domain = sanitize_text_field($_POST['domain'] ?? '');
+    $domain   = sanitize_text_field($_POST['domain'] ?? '');
     $enseigne = sanitize_text_field($_POST['enseigne'] ?? '');
-    $api_key = sanitize_text_field($_POST['api_key'] ?? '');
+    $api_key  = sanitize_text_field($_POST['api_key'] ?? '');
 
     try {
         $domain = rtrim($domain, "/") . '/';
@@ -44,6 +44,7 @@ function wt_iew_test_connection() {
 
         $data = json_decode(wp_remote_retrieve_body($response), true);
 
+        // Handle API error response
         if (isset($data['error_message'])) {
             $msg = (strpos($data['error_message'], 'Unknown database') !== false)
                 ? 'Failed to connect to ' . $enseigne
@@ -52,12 +53,33 @@ function wt_iew_test_connection() {
             wp_send_json_error(array('status' => false, 'msg' => $msg));
         }
 
-        wp_send_json_success(array('status' => true, 'msg' => 'Connection successful!'));
+        // ✅ If success: save credentials
+        $settings = array(
+            'domain'   => $domain,
+            'enseigne' => $enseigne,
+            'api_key'  => $api_key
+        );
+        update_option('wt_iew_advanced_settings', $settings);
+
+        // ✅ Save the shop response
+        if (!empty($data)) {
+            update_option('oopos_shops', $data);
+        }
+
+        wp_send_json_success(array(
+            'status' => true,
+            'msg'    => 'Connection successful! Credentials and shops saved.',
+            'shops'  => $data
+        ));
 
     } catch (Exception $e) {
-        wp_send_json_error(array('status' => false, 'msg' => 'Failed to connect: ' . $e->getMessage()));
+        wp_send_json_error(array(
+            'status' => false,
+            'msg' => 'Failed to connect: ' . $e->getMessage(),
+        ));
     }
 }
+
 
 
 
