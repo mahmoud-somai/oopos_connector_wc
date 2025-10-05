@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
             _wpnonce: wt_iew_ajax.nonce
         });
 
-        // Load shops
+        // Load shops via AJAX
         jQuery.post(wt_iew_ajax.ajax_url, {
             action: 'oopos_get_shops',
             _wpnonce: wt_iew_ajax.nonce
@@ -78,71 +78,52 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.success && Array.isArray(response.data)) {
                 allShops = response.data;
 
-                // After shops are loaded (inside AJAX success)
-const container = document.getElementById('shops-container');
-const addBtn = document.getElementById('add-shop');
+                const container = document.getElementById('shops-container');
+                const addBtn = document.getElementById('add-shop');
 
-function addShopRow(selected = '') {
-    const div = document.createElement('div');
-    div.classList.add('shop-row');
-    div.innerHTML = `
-        <label>Extra Shop:</label>
-        <select name="oopos_connector_data[shop_selected][]" class="shop-select">
-            <option value="">-- Choose shop --</option>
-            ${allShops.map(shop => `<option value="${shop}" ${shop === selected ? 'selected' : ''}>${shop}</option>`).join('')}
-        </select>
-        <button type="button" class="remove-shop">Remove</button>
-    `;
-    container.appendChild(div);
+                // ===== Functions =====
+                function updateSelectedShops() {
+                    selected_shops = Array.from(container.querySelectorAll('.shop-select'))
+                        .map(select => select.value)
+                        .filter(v => v);
+                    console.log('Selected shops:', selected_shops);
+                }
 
-    // Remove row
-    div.querySelector('.remove-shop').addEventListener('click', () => {
-        div.remove();
-        updateSelectedShops();
-    });
+                function addShopRow(selected = '') {
+                    const div = document.createElement('div');
+                    div.classList.add('shop-row');
+                    div.innerHTML = `
+                        <label>Extra Shop:</label>
+                        <select name="oopos_connector_data[shop_selected][]" class="shop-select">
+                            <option value="">-- Choose shop --</option>
+                            ${allShops.map(shop => `<option value="${shop}" ${shop === selected ? 'selected' : ''}>${shop}</option>`).join('')}
+                        </select>
+                        <button type="button" class="remove-shop">Remove</button>
+                    `;
+                    container.appendChild(div);
 
-    // Update selected_shops when changed
-    div.querySelector('.shop-select').addEventListener('change', updateSelectedShops);
-
-    updateSelectedShops();
-}
-
-// Attach add button **after AJAX shops loaded**
-addBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    addShopRow();
-});
-
-// Update selected_shops array
-function updateSelectedShops() {
-    selected_shops = Array.from(container.querySelectorAll('input[type="checkbox"]:checked'))
-        .map(input => input.value);
-    console.log('Selected shops:', selected_shops);
-}
-
-// Event listener for all checkboxes
-container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', updateSelectedShops);
-});
-
-// Initialize selected_shops
-updateSelectedShops();
-
-                // ===== Initialize event listeners =====
-                container.querySelectorAll('.shop-select').forEach(selectEl => {
-                    selectEl.addEventListener('change', updateSelectedShops);
-                });
-
-                container.querySelectorAll('.remove-shop').forEach(btn => {
-                    btn.addEventListener('click', e => {
-                        e.target.closest('.shop-row').remove();
+                    // Event listeners for this row
+                    div.querySelector('.remove-shop').addEventListener('click', () => {
+                        div.remove();
                         updateSelectedShops();
                     });
+                    div.querySelector('.shop-select').addEventListener('change', updateSelectedShops);
+
+                    updateSelectedShops();
+                }
+
+                // ===== Initialize existing shops (checkboxes from PHP) =====
+                container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', updateSelectedShops);
                 });
 
-                addBtn.addEventListener('click', () => addShopRow());
+                // ===== Add button =====
+                addBtn.addEventListener('click', e => {
+                    e.preventDefault();
+                    addShopRow();
+                });
 
-                // Initial selected shops
+                // Initialize selected_shops at load
                 updateSelectedShops();
             }
         });
@@ -153,12 +134,10 @@ updateSelectedShops();
         step2.style.display = 'none';
         step1.style.display = 'block';
     });
-
     document.getElementById('to-step3').addEventListener('click', () => {
         step2.style.display = 'none';
         step3.style.display = 'block';
     });
-
     document.getElementById('back-step2').addEventListener('click', () => {
         step3.style.display = 'none';
         step2.style.display = 'block';
