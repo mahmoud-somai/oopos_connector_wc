@@ -78,40 +78,49 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.success && Array.isArray(response.data)) {
                 allShops = response.data;
 
-                const container = document.getElementById('shops-container');
-                const addBtn = document.getElementById('add-shop');
+                // After shops are loaded (inside AJAX success)
+const container = document.getElementById('shops-container');
+const addBtn = document.getElementById('add-shop');
 
-                // ===== Add extra shop row =====
-                function addShopRow(selected = '') {
-                    const div = document.createElement('div');
-                    div.classList.add('shop-row');
-                    div.innerHTML = `
-                        <label>Extra Shop:</label>
-                        <select name="oopos_connector_data[shop_selected][]" class="shop-select">
-                            <option value="">-- Choose shop --</option>
-                            ${allShops.map(shop => `<option value="${shop}" ${shop === selected ? 'selected' : ''}>${shop}</option>`).join('')}
-                        </select>
-                        <button type="button" class="remove-shop">Remove</button>
-                    `;
-                    container.appendChild(div);
+function addShopRow(selected = '') {
+    const div = document.createElement('div');
+    div.classList.add('shop-row');
+    div.innerHTML = `
+        <label>Extra Shop:</label>
+        <select name="oopos_connector_data[shop_selected][]" class="shop-select">
+            <option value="">-- Choose shop --</option>
+            ${allShops.map(shop => `<option value="${shop}" ${shop === selected ? 'selected' : ''}>${shop}</option>`).join('')}
+        </select>
+        <button type="button" class="remove-shop">Remove</button>
+    `;
+    container.appendChild(div);
 
-                    const removeBtn = div.querySelector('.remove-shop');
-                    removeBtn.addEventListener('click', () => {
-                        div.remove();
-                        updateSelectedShops();
-                    });
+    const removeBtn = div.querySelector('.remove-shop');
+    removeBtn.addEventListener('click', () => {
+        div.remove();
+        updateSelectedShops();
+    });
 
-                    const selectEl = div.querySelector('.shop-select');
-                    selectEl.addEventListener('change', updateSelectedShops);
-                }
+    const selectEl = div.querySelector('.shop-select');
+    selectEl.addEventListener('change', updateSelectedShops);
 
-                // ===== Update selected shops array =====
-                function updateSelectedShops() {
-                    selected_shops = Array.from(container.querySelectorAll('.shop-select'))
-                        .map(s => s.value)
-                        .filter(v => v);
-                    console.log('Selected shops:', selected_shops);
-                }
+    updateSelectedShops();
+}
+
+// Ensure the add button works
+addBtn.addEventListener('click', function(e) {
+    e.preventDefault(); // prevent any default button behavior
+    addShopRow();
+});
+
+// Update selected_shops
+function updateSelectedShops() {
+    selected_shops = Array.from(container.querySelectorAll('.shop-select'))
+        .map(s => s.value)
+        .filter(v => v);
+    console.log('Selected shops:', selected_shops);
+}
+
 
                 // ===== Initialize event listeners =====
                 container.querySelectorAll('.shop-select').forEach(selectEl => {
