@@ -14,6 +14,7 @@ function oopos_connector_menu() {
 }
 
 add_action('wp_ajax_wt_iew_test_connection', 'wt_iew_test_connection');
+
 function wt_iew_test_connection() {
     check_ajax_referer('wt_iew_nonce');
 
@@ -22,29 +23,42 @@ function wt_iew_test_connection() {
     $api_key = sanitize_text_field($_POST['api_key'] ?? '');
 
     try {
-        $headers = array('Accept' => 'application/json');
         $domain = rtrim($domain, "/") . '/';
         $api_path = $domain . 'api/v2/query.do?enseigne=' . $enseigne . '&api-key=' . $api_key;
         $shop_query = "SELECT Magasin FROM magasins;";
 
-        // Use Unirest to send request
-        Unirest\Request::verifyPeer(false);
-        $response = Unirest\Request::put($api_path, $headers, $shop_query);
-        $data = json_decode(json_encode($response->body), true);
+        // Use WordPress HTTP API
+        $response = wp_remote_post($api_path, array(
+            'method'  => 'PUT',
+            'headers' => array('Accept' => 'application/json'),
+            'body'    => $shop_query,
+            'timeout' => 15,
+        ));
+
+        if (is_wp_error($response)) {
+            wp_send_json_error(array(
+                'status' => false,
+                'msg' => 'Connection error: ' . $response->get_error_message(),
+            ));
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($response), true);
 
         if (isset($data['error_message'])) {
             $msg = (strpos($data['error_message'], 'Unknown database') !== false)
                 ? 'Failed to connect to ' . $enseigne
                 : $data['error_message'];
 
-            wp_send_json_success(array('status' => false, 'msg' => $msg));
+            wp_send_json_error(array('status' => false, 'msg' => $msg));
         }
-    } catch (Exception $e) {
-        wp_send_json_success(array('status' => false, 'msg' => 'Failed to connect to ' . $domain));
-    }
 
-    wp_send_json_success(array('status' => true, 'msg' => 'Connection successful!'));
+        wp_send_json_success(array('status' => true, 'msg' => 'Connection successful!'));
+
+    } catch (Exception $e) {
+        wp_send_json_error(array('status' => false, 'msg' => 'Failed to connect: ' . $e->getMessage()));
+    }
 }
+
 
 
 // Save Step 1 via AJAX
