@@ -80,6 +80,29 @@ function wt_iew_test_connection() {
     }
 }
 
+// ✅ AJAX endpoint to fetch saved shops
+add_action('wp_ajax_oopos_get_shops', 'oopos_get_shops');
+function oopos_get_shops() {
+    check_ajax_referer('wt_iew_nonce');
+
+    $shops_data = get_option('oopos_shops', array());
+    $shops = array();
+
+    if (!empty($shops_data) && isset($shops_data['data']) && is_array($shops_data['data'])) {
+        foreach ($shops_data['data'] as $shop) {
+            if (isset($shop['Magasin'])) {
+                $shops[] = $shop['Magasin'];
+            }
+        }
+    }
+
+    if (!empty($shops)) {
+        wp_send_json_success($shops);
+    } else {
+        wp_send_json_error('No shops found');
+    }
+}
+
 
 
 

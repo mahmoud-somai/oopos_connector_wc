@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextButton = document.getElementById('to-step2');
     const connectionStatus = document.getElementById('connection-status');
 
-    // ===== Add Test Connection button handler =====
+    // ===== Test Connection button handler =====
     document.getElementById('test-connection').addEventListener('click', () => {
         // Reset errors and connection status
         domainError.textContent = '';
@@ -67,13 +67,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ===== Existing Next button handler =====
+    // ===== Go to Step 2 =====
     nextButton.addEventListener('click', () => {
-        // Optional: you can keep the validation here too
         step1.style.display = 'none';
         step2.style.display = 'block';
 
-        // Save values via AJAX if needed
+        // Save credentials (Step 1)
         const data = {
             action: 'wt_iew_save_step1',
             domain: domainInput.value.trim(),
@@ -82,10 +81,39 @@ document.addEventListener('DOMContentLoaded', function() {
             _wpnonce: wt_iew_ajax.nonce
         };
         jQuery.post(wt_iew_ajax.ajax_url, data, function(response) {
-            console.log(response);
+            console.log("Step1 Saved", response);
+        });
+
+        // 🟢 Load shops dynamically from database
+        jQuery.post(wt_iew_ajax.ajax_url, {
+            action: 'oopos_get_shops',
+            _wpnonce: wt_iew_ajax.nonce
+        }, function(response) {
+            const selects = ['#main_shop', '#shop2', '#shop3'];
+
+            if (response.success && Array.isArray(response.data)) {
+                selects.forEach(sel => {
+                    const select = document.querySelector(sel);
+                    select.innerHTML = '<option value="">-- Select Shop --</option>';
+                    response.data.forEach(shop => {
+                        const option = document.createElement('option');
+                        option.value = shop;
+                        option.textContent = shop;
+                        select.appendChild(option);
+                    });
+                    select.disabled = false;
+                });
+            } else {
+                selects.forEach(sel => {
+                    const select = document.querySelector(sel);
+                    select.innerHTML = '<option value="">No shops found</option>';
+                    select.disabled = true;
+                });
+            }
         });
     });
 
+    // ===== Back / Next Navigation =====
     document.getElementById('back-step1').addEventListener('click', () => {
         step2.style.display = 'none';
         step1.style.display = 'block';

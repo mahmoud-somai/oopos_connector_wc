@@ -1,5 +1,17 @@
 <?php
 function oopos_connector_page() {
+        $data = get_option('oopos_connector_data', array());
+    $shops_data = get_option('oopos_shops', array());
+
+    // Décoder les données des shops (car c’est une option sérialisée)
+    $shops = array();
+    if (!empty($shops_data) && isset($shops_data['data']) && is_array($shops_data['data'])) {
+        foreach ($shops_data['data'] as $shop) {
+            if (isset($shop['Magasin'])) {
+                $shops[] = $shop['Magasin'];
+            }
+        }
+    }
     $data = get_option('oopos_connector_data', array());
     ?>
     <div class="wrap">
@@ -38,15 +50,31 @@ function oopos_connector_page() {
 
 
                 <!-- Step 2 -->
-                <div class="step" id="step2">
-                    <label>Main Shop 1:</label><br>
-                    <input type="text" name="oopos_connector_data[main_shop]" value="<?php echo esc_attr($data['main_shop'] ?? ''); ?>"><br>
+               
+                        </select><br><br>
 
-                    <label>Shop 2:</label><br>
-                    <input type="text" name="oopos_connector_data[shop2]" value="<?php echo esc_attr($data['shop2'] ?? ''); ?>"><br>
+                        <label>Shop 2:</label><br>
+                        <select name="oopos_connector_data[shop2]">
+                            <?php foreach ($shops as $shop_name): ?>
+                                <option value="<?php echo esc_attr($shop_name); ?>" 
+                                    <?php selected($data['shop2'] ?? '', $shop_name); ?>>
+                                    <?php echo esc_html($shop_name); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select><br><br>
 
-                    <label>Shop 3:</label><br>
-                    <input type="text" name="oopos_connector_data[shop3]" value="<?php echo esc_attr($data['shop3'] ?? ''); ?>"><br>
+                        <label>Shop 3:</label><br>
+                        <select name="oopos_connector_data[shop3]">
+                            <?php foreach ($shops as $shop_name): ?>
+                                <option value="<?php echo esc_attr($shop_name); ?>" 
+                                    <?php selected($data['shop3'] ?? '', $shop_name); ?>>
+                                    <?php echo esc_html($shop_name); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select><br><br>
+                    <?php else : ?>
+                        <p style="color:red;">⚠️ No shops found. Please test the connection first.</p>
+                    <?php endif; ?>
 
                     <button type="button" id="back-step1">Previous</button>
                     <button type="button" id="to-step3">Next</button>
