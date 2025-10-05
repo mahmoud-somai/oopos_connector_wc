@@ -14,11 +14,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextButton = document.getElementById('to-step2');
     const connectionStatus = document.getElementById('connection-status');
 
-    // Variables to store selected shops
-    let selected_shop = '';
-    let selected_extra_shops = [];
+    // ===== Variables =====
+    let selected_shops = [];
+    let allShops = [];
 
-    // ===== Test Connection button handler =====
+    // ===== Test Connection =====
     document.getElementById('test-connection').addEventListener('click', () => {
         domainError.textContent = '';
         enseigneError.textContent = '';
@@ -38,7 +38,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!valid) return;
 
-        // AJAX call to test connection
+        console.log("Testing connection with:", { domainVal, enseigneVal, apiKeyVal });
+
+        // AJAX test
         jQuery.post(wt_iew_ajax.ajax_url, {
             action: 'wt_iew_test_connection',
             domain: domainVal,
@@ -46,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
             api_key: apiKeyVal,
             _wpnonce: wt_iew_ajax.nonce
         }, function(response) {
+            console.log("Connection response:", response);
             if (response.success && response.data.status) {
                 connectionStatus.style.color = 'green';
                 connectionStatus.textContent = response.data.msg;
@@ -63,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
         step1.style.display = 'none';
         step2.style.display = 'block';
 
-        // Save credentials (Step 1)
+        // Save step1 data
         jQuery.post(wt_iew_ajax.ajax_url, {
             action: 'wt_iew_save_step1',
             domain: domainInput.value.trim(),
@@ -71,53 +74,85 @@ document.addEventListener('DOMContentLoaded', function() {
             api_key: apiKeyInput.value.trim(),
             _wpnonce: wt_iew_ajax.nonce
         }, function(response) {
-            console.log("Step1 Saved", response);
+            console.log("Step1 Saved:", response);
         });
 
-        // Load shops dynamically
+        // Load shops
         jQuery.post(wt_iew_ajax.ajax_url, {
             action: 'oopos_get_shops',
             _wpnonce: wt_iew_ajax.nonce
         }, function(response) {
+            console.log("Shops loaded:", response);
+
             if (response.success && Array.isArray(response.data)) {
+                allShops = response.data;
+
                 const mainShopSelect = document.querySelector('select[name="oopos_connector_data[main_shop]"]');
                 const extraShopsSelect = document.querySelector('select[name="oopos_connector_data[extra_shops][]"]');
 
-                // Main Shop
+                // Build main shop select
                 mainShopSelect.innerHTML = '<option value="">-- Choose main shop --</option>';
-                response.data.forEach(shop => {
+                allShops.forEach(shop => {
                     const option = document.createElement('option');
                     option.value = shop;
                     option.textContent = shop;
                     mainShopSelect.appendChild(option);
                 });
-                mainShopSelect.disabled = false;
 
-                // Extra Shops
+                // Build extra shops select
                 extraShopsSelect.innerHTML = '';
-                response.data.forEach(shop => {
+                allShops.forEach(shop => {
                     const option = document.createElement('option');
                     option.value = shop;
                     option.textContent = shop;
                     extraShopsSelect.appendChild(option);
                 });
-                extraShopsSelect.disabled = false;
 
-                // ===== Listen to main shop selection =====
+                // ===== Functions =====
+                function updateExtraShopOptions() {
+                    const mainValue = mainShopSelect.value;
+                    extraShopsSelect.innerHTML = '';
+
+                    allShops.forEach(shop => {
+                        if (shop !== mainValue) {
+                            const opt = document.createElement('option');
+                            opt.value = shop;
+                            opt.textContent = shop;
+                            extraShopsSelect.appendChild(opt);
+                        }
+                    });
+
+                    console.log("Extra shop options updated (excluded main):", mainValue);
+                }
+
+                function updateSelectedShops() {
+                    const mainValue = mainShopSelect.value;
+                    const extras = Array.from(extraShopsSelect.selectedOptions).map(o => o.value);
+
+                    selected_shops = [];
+                    if (mainValue) selected_shops.push(mainValue);
+                    selected_shops.push(...extras);
+
+                    console.log("Selected shops array:", selected_shops);
+                }
+
+                // ===== Event listeners =====
                 mainShopSelect.addEventListener('change', function() {
-                    selected_shop = this.value;
-                    console.log("Main shop selected:", selected_shop);
+                    console.log("Main shop changed:", this.value);
+                    updateExtraShopOptions();
+                    updateSelectedShops();
                 });
 
-                // ===== Listen to extra shops selection =====
                 extraShopsSelect.addEventListener('change', function() {
-                    selected_extra_shops = Array.from(this.selectedOptions).map(opt => opt.value);
-                    console.log("Extra shops selected:", selected_extra_shops);
+                    console.log("Extra shops changed:", Array.from(this.selectedOptions).map(o => o.value));
+                    updateSelectedShops();
                 });
 
-                // Optional: log initial values if pre-selected
-                selected_shop = mainShopSelect.value;
-                selected_extra_shops = Array.from(extraShopsSelect.selectedOptions).map(opt => opt.value);
+                // Initialize default state
+                updateExtraShopOptions();
+                updateSelectedShops();
+            } else {
+                console.error("Failed to load shops:", response);
             }
         });
     });
