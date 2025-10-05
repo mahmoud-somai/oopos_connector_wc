@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const connectionStatus = document.getElementById('connection-status');
 
     // ===== Variables =====
-    let selected_shops = [];
     let allShops = [];
+    let selected_shops = [];
 
     // ===== Test Connection =====
     document.getElementById('test-connection').addEventListener('click', () => {
@@ -87,70 +87,35 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.success && Array.isArray(response.data)) {
                 allShops = response.data;
 
-                const mainShopSelect = document.querySelector('select[name="oopos_connector_data[main_shop]"]');
-                const extraShopsSelect = document.querySelector('select[name="oopos_connector_data[extra_shops][]"]');
+                const shopSelect = document.getElementById('shop_selected');
+                if (!shopSelect) return;
 
-                // Build main shop select
-                mainShopSelect.innerHTML = '<option value="">-- Choose main shop --</option>';
+                // Build shop multi-select
+                shopSelect.innerHTML = '';
                 allShops.forEach(shop => {
                     const option = document.createElement('option');
                     option.value = shop;
                     option.textContent = shop;
-                    mainShopSelect.appendChild(option);
+                    shopSelect.appendChild(option);
                 });
 
-                // Build extra shops select
-                extraShopsSelect.innerHTML = '';
-                allShops.forEach(shop => {
-                    const option = document.createElement('option');
-                    option.value = shop;
-                    option.textContent = shop;
-                    extraShopsSelect.appendChild(option);
-                });
-
-                // ===== Functions =====
-                function updateExtraShopOptions() {
-                    const mainValue = mainShopSelect.value;
-                    extraShopsSelect.innerHTML = '';
-
-                    allShops.forEach(shop => {
-                        if (shop !== mainValue) {
-                            const opt = document.createElement('option');
-                            opt.value = shop;
-                            opt.textContent = shop;
-                            extraShopsSelect.appendChild(opt);
-                        }
+                // Restore previously selected shops if any
+                if (window.savedShopSelected && Array.isArray(window.savedShopSelected)) {
+                    Array.from(shopSelect.options).forEach(o => {
+                        if (window.savedShopSelected.includes(o.value)) o.selected = true;
                     });
-
-                    console.log("Extra shop options updated (excluded main):", mainValue);
                 }
 
-                function updateSelectedShops() {
-                    const mainValue = mainShopSelect.value;
-                    const extras = Array.from(extraShopsSelect.selectedOptions).map(o => o.value);
-
-                    selected_shops = [];
-                    if (mainValue) selected_shops.push(mainValue);
-                    selected_shops.push(...extras);
-
-                    console.log("Selected shops array:", selected_shops);
-                }
-
-                // ===== Event listeners =====
-                mainShopSelect.addEventListener('change', function() {
-                    console.log("Main shop changed:", this.value);
-                    updateExtraShopOptions();
-                    updateSelectedShops();
+                // Event: update selected_shops
+                shopSelect.addEventListener('change', function() {
+                    selected_shops = Array.from(this.selectedOptions).map(o => o.value);
+                    console.log('Selected shops:', selected_shops);
                 });
 
-                extraShopsSelect.addEventListener('change', function() {
-                    console.log("Extra shops changed:", Array.from(this.selectedOptions).map(o => o.value));
-                    updateSelectedShops();
-                });
+                // Initialize selected_shops
+                selected_shops = Array.from(shopSelect.selectedOptions).map(o => o.value);
+                console.log('Initial selected shops:', selected_shops);
 
-                // Initialize default state
-                updateExtraShopOptions();
-                updateSelectedShops();
             } else {
                 console.error("Failed to load shops:", response);
             }

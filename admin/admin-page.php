@@ -51,30 +51,19 @@ function oopos_connector_page() {
 
 
 
+
 <!-- Step 2 -->
 <div class="step" id="step2" style="display:none;">
     <h3>Select your shops</h3>
 
     <?php if (!empty($shops)) : ?>
-        <!-- Main Shop -->
-        <label>Main Shop:</label><br>
-        <select name="oopos_connector_data[main_shop]" required>
-            <option value="">-- Choose main shop --</option>
-            <?php foreach ($shops as $shop_name): ?>
-                <option value="<?php echo esc_attr($shop_name); ?>" 
-                    <?php selected($data['main_shop'] ?? '', $shop_name); ?>>
-                    <?php echo esc_html($shop_name); ?>
-                </option>
-            <?php endforeach; ?>
-        </select><br><br>
-
-        <!-- Extra Shops (Multi-select) -->
-        <label>Extra Shops:</label><br>
-        <select name="oopos_connector_data[extra_shops][]" multiple size="10">
+        <!-- All Shops (single multi-select) -->
+        <label>Shops (select main + extra):</label><br>
+        <select name="oopos_connector_data[shop_selected][]" id="shop_selected" multiple size="10">
             <?php foreach ($shops as $shop_name): ?>
                 <option value="<?php echo esc_attr($shop_name); ?>"
                     <?php 
-                        if (!empty($data['extra_shops']) && in_array($shop_name, $data['extra_shops'])) {
+                        if (!empty($data['shop_selected']) && in_array($shop_name, $data['shop_selected'])) {
                             echo 'selected';
                         }
                     ?>>
@@ -82,7 +71,6 @@ function oopos_connector_page() {
                 </option>
             <?php endforeach; ?>
         </select><br><br>
-        
 
     <?php else : ?>
         <p style="color:red;">⚠️ No shops found. Please test the connection first.</p>
@@ -91,7 +79,6 @@ function oopos_connector_page() {
     <button type="button" id="back-step1">Previous</button>
     <button type="button" id="to-step3">Next</button>
 </div>
-
 
 
                 <!-- Step 3 -->
