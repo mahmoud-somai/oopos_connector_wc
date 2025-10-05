@@ -58,7 +58,7 @@ function oopos_connector_page() {
     <?php if (!empty($shops)) : ?>
         <!-- Main Shop -->
         <label>Main Shop:</label><br>
-        <select name="oopos_connector_data[main_shop]" required>
+        <select id="main_shop" name="oopos_connector_data[main_shop]" required>
             <option value="">-- Choose main shop --</option>
             <?php foreach ($shops as $shop_name): ?>
                 <option value="<?php echo esc_attr($shop_name); ?>" 
@@ -68,21 +68,11 @@ function oopos_connector_page() {
             <?php endforeach; ?>
         </select><br><br>
 
-        <!-- Extra Shops (Multi-select) -->
-        <label>Extra Shops:</label><br>
-        <select name="oopos_connector_data[extra_shops][]" multiple size="10">
-            <?php foreach ($shops as $shop_name): ?>
-                <option value="<?php echo esc_attr($shop_name); ?>"
-                    <?php 
-                        if (!empty($data['extra_shops']) && in_array($shop_name, $data['extra_shops'])) {
-                            echo 'selected';
-                        }
-                    ?>>
-                    <?php echo esc_html($shop_name); ?>
-                </option>
-            <?php endforeach; ?>
-        </select><br><br>
-        
+        <!-- Container for Extra Shops -->
+        <div id="extra-shops-container"></div>
+
+        <!-- Add Shop Button (hidden initially) -->
+        <button type="button" id="add-shop" style="display:none;">+ Add another shop</button><br><br>
 
     <?php else : ?>
         <p style="color:red;">⚠️ No shops found. Please test the connection first.</p>
