@@ -49,8 +49,8 @@ function oopos_connector_page() {
 
 
 
-                <!-- Step 2 -->
-               
+
+
 <!-- Step 2 -->
 <div class="step" id="step2" style="display:none;">
     <h3>Select your shops</h3>
@@ -64,6 +64,8 @@ function oopos_connector_page() {
         ?>
             <label><?php echo esc_html($label); ?>:</label><br>
             <select name="oopos_connector_data[<?php echo esc_attr($select_name); ?>]">
+                <!-- Placeholder option -->
+                <option value="">-- Choose a shop --</option>
                 <?php foreach ($shops as $shop_name): ?>
                     <option value="<?php echo esc_attr($shop_name); ?>" 
                         <?php selected($data[$select_name] ?? '', $shop_name); ?>>
@@ -80,6 +82,7 @@ function oopos_connector_page() {
     <button type="button" id="back-step1">Previous</button>
     <button type="button" id="to-step3">Next</button>
 </div>
+
 
                 <!-- Step 3 -->
                 <div class="step" id="step3">
