@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextButton = document.getElementById('to-step2');
     const connectionStatus = document.getElementById('connection-status');
 
-    let allShops = [];
     let selected_shops = [];
 
     // ===== Test Connection =====
@@ -56,6 +55,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // ===== Update Selected Shops =====
+    function updateSelectedShops() {
+        const container = document.getElementById('shops-container');
+        selected_shops = [];
+
+        container.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+            selected_shops.push(cb.value);
+        });
+
+        console.log('Selected shops:', selected_shops);
+    }
+
     // ===== Go to Step 2 =====
     nextButton.addEventListener('click', () => {
         step1.style.display = 'none';
@@ -70,73 +81,15 @@ document.addEventListener('DOMContentLoaded', function() {
             _wpnonce: wt_iew_ajax.nonce
         });
 
-        // Load shops via AJAX
-        jQuery.post(wt_iew_ajax.ajax_url, {
-            action: 'oopos_get_shops',
-            _wpnonce: wt_iew_ajax.nonce
-        }, function(response) {
-            if (response.success && Array.isArray(response.data)) {
-                allShops = response.data;
+        const container = document.getElementById('shops-container');
 
-                const container = document.getElementById('shops-container');
-                const addBtn = document.getElementById('add-shop');
-
-                // ===== Functions =====
-function updateSelectedShops() {
-    selected_shops = [];
-
-    // Add checked checkboxes
-    container.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
-        selected_shops.push(checkbox.value);
-    });
-
-    // Add selected values from dynamic selects
-    container.querySelectorAll('.shop-select').forEach(select => {
-        if (select.value) selected_shops.push(select.value);
-    });
-
-    console.log('Selected shops:', selected_shops);
-}
-
-
-                function addShopRow(selected = '') {
-                    const div = document.createElement('div');
-                    div.classList.add('shop-row');
-                    div.innerHTML = `
-                        <label>Extra Shop:</label>
-                        <select name="oopos_connector_data[shop_selected][]" class="shop-select">
-                            <option value="">-- Choose shop --</option>
-                            ${allShops.map(shop => `<option value="${shop}" ${shop === selected ? 'selected' : ''}>${shop}</option>`).join('')}
-                        </select>
-                        <button type="button" class="remove-shop">Remove</button>
-                    `;
-                    container.appendChild(div);
-
-                    // Event listeners for this row
-                    div.querySelector('.remove-shop').addEventListener('click', () => {
-                        div.remove();
-                        updateSelectedShops();
-                    });
-                    div.querySelector('.shop-select').addEventListener('change', updateSelectedShops);
-
-                    updateSelectedShops();
-                }
-
-                // ===== Initialize existing shops (checkboxes from PHP) =====
-                container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.addEventListener('change', updateSelectedShops);
-                });
-
-                // ===== Add button =====
-                addBtn.addEventListener('click', e => {
-                    e.preventDefault();
-                    addShopRow();
-                });
-
-                // Initialize selected_shops at load
-                updateSelectedShops();
-            }
+        // Initialize event listeners for all checkboxes
+        container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', updateSelectedShops);
         });
+
+        // Initialize selected shops at load
+        updateSelectedShops();
     });
 
     // ===== Navigation Buttons =====
@@ -144,10 +97,12 @@ function updateSelectedShops() {
         step2.style.display = 'none';
         step1.style.display = 'block';
     });
+
     document.getElementById('to-step3').addEventListener('click', () => {
         step2.style.display = 'none';
         step3.style.display = 'block';
     });
+
     document.getElementById('back-step2').addEventListener('click', () => {
         step3.style.display = 'none';
         step2.style.display = 'block';
