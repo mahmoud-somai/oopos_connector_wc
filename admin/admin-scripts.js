@@ -184,22 +184,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Main select change: show/hide add button and refresh extras
-    mainSelect.addEventListener('change', function () {
-        const v = this.value;
-        console.log('Main shop selected:', v);
+mainSelect.addEventListener('change', function () {
+    const v = this.value;
+    console.log('Main shop selected:', v);
 
-        // show add button only when a main is selected
-        if (v) {
-            addBtn.style.display = 'inline-block';
-            addBtn.disabled = false;
-        } else {
-            addBtn.style.display = 'none';
-        }
+    if (v) {
+        addBtn.style.display = 'inline-block'; // show the button
+        addBtn.disabled = false;
+    } else {
+        addBtn.style.display = 'none';
+    }
 
-        // refresh existing extra selects (they must not include the main shop)
-        refreshAllExtraSelects();
-        updateSelectedShopsAndLog();
-    });
+    refreshAllExtraSelects();
+    updateSelectedShopsAndLog();
+});
+
 
     // Add button click
     addBtn.addEventListener('click', function () {
