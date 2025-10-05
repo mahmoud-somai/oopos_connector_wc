@@ -57,20 +57,49 @@ function oopos_connector_page() {
     <h3>Select your shops</h3>
 
     <?php if (!empty($shops)) : ?>
-        <!-- All Shops (single multi-select) -->
-        <label>Shops (select main + extra):</label><br>
-        <select name="oopos_connector_data[shop_selected][]" id="shop_selected" multiple size="10">
-            <?php foreach ($shops as $shop_name): ?>
-                <option value="<?php echo esc_attr($shop_name); ?>"
-                    <?php 
-                        if (!empty($data['shop_selected']) && in_array($shop_name, $data['shop_selected'])) {
-                            echo 'selected';
-                        }
-                    ?>>
-                    <?php echo esc_html($shop_name); ?>
-                </option>
+        <div id="shops-container">
+            <?php
+            // Load saved shops or initialize
+            $saved_shops = $data['shop_selected'] ?? [];
+            $main_shop = $saved_shops[0] ?? '';
+            $extra_shops = array_slice($saved_shops, 1);
+
+            // Main Shop Row
+            ?>
+            <div class="shop-row">
+                <label>Main Shop:</label>
+                <select name="oopos_connector_data[shop_selected][]" class="shop-select" required>
+                    <option value="">-- Choose main shop --</option>
+                    <?php foreach ($shops as $shop_name): ?>
+                        <option value="<?php echo esc_attr($shop_name); ?>"
+                            <?php selected($main_shop, $shop_name); ?>>
+                            <?php echo esc_html($shop_name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <?php
+            // Extra Shop Rows
+            foreach ($extra_shops as $shop) :
+            ?>
+                <div class="shop-row">
+                    <label>Extra Shop:</label>
+                    <select name="oopos_connector_data[shop_selected][]" class="shop-select">
+                        <option value="">-- Choose shop --</option>
+                        <?php foreach ($shops as $shop_name): ?>
+                            <option value="<?php echo esc_attr($shop_name); ?>"
+                                <?php selected($shop, $shop_name); ?>>
+                                <?php echo esc_html($shop_name); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="button" class="remove-shop">Remove</button>
+                </div>
             <?php endforeach; ?>
-        </select><br><br>
+        </div>
+
+        <button type="button" id="add-shop">+ Add Shop</button><br><br>
 
     <?php else : ?>
         <p style="color:red;">⚠️ No shops found. Please test the connection first.</p>

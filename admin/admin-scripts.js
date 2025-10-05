@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextButton = document.getElementById('to-step2');
     const connectionStatus = document.getElementById('connection-status');
 
-    // ===== Variables =====
     let allShops = [];
     let selected_shops = [];
 
@@ -38,9 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!valid) return;
 
-        console.log("Testing connection with:", { domainVal, enseigneVal, apiKeyVal });
-
-        // AJAX test
         jQuery.post(wt_iew_ajax.ajax_url, {
             action: 'wt_iew_test_connection',
             domain: domainVal,
@@ -48,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
             api_key: apiKeyVal,
             _wpnonce: wt_iew_ajax.nonce
         }, function(response) {
-            console.log("Connection response:", response);
             if (response.success && response.data.status) {
                 connectionStatus.style.color = 'green';
                 connectionStatus.textContent = response.data.msg;
@@ -73,8 +68,6 @@ document.addEventListener('DOMContentLoaded', function() {
             enseigne: enseigneInput.value.trim(),
             api_key: apiKeyInput.value.trim(),
             _wpnonce: wt_iew_ajax.nonce
-        }, function(response) {
-            console.log("Step1 Saved:", response);
         });
 
         // Load shops
@@ -82,42 +75,60 @@ document.addEventListener('DOMContentLoaded', function() {
             action: 'oopos_get_shops',
             _wpnonce: wt_iew_ajax.nonce
         }, function(response) {
-            console.log("Shops loaded:", response);
-
             if (response.success && Array.isArray(response.data)) {
                 allShops = response.data;
 
-                const shopSelect = document.getElementById('shop_selected');
-                if (!shopSelect) return;
+                const container = document.getElementById('shops-container');
+                const addBtn = document.getElementById('add-shop');
 
-                // Build shop multi-select
-                shopSelect.innerHTML = '';
-                allShops.forEach(shop => {
-                    const option = document.createElement('option');
-                    option.value = shop;
-                    option.textContent = shop;
-                    shopSelect.appendChild(option);
-                });
+                // ===== Add extra shop row =====
+                function addShopRow(selected = '') {
+                    const div = document.createElement('div');
+                    div.classList.add('shop-row');
+                    div.innerHTML = `
+                        <label>Extra Shop:</label>
+                        <select name="oopos_connector_data[shop_selected][]" class="shop-select">
+                            <option value="">-- Choose shop --</option>
+                            ${allShops.map(shop => `<option value="${shop}" ${shop === selected ? 'selected' : ''}>${shop}</option>`).join('')}
+                        </select>
+                        <button type="button" class="remove-shop">Remove</button>
+                    `;
+                    container.appendChild(div);
 
-                // Restore previously selected shops if any
-                if (window.savedShopSelected && Array.isArray(window.savedShopSelected)) {
-                    Array.from(shopSelect.options).forEach(o => {
-                        if (window.savedShopSelected.includes(o.value)) o.selected = true;
+                    const removeBtn = div.querySelector('.remove-shop');
+                    removeBtn.addEventListener('click', () => {
+                        div.remove();
+                        updateSelectedShops();
                     });
+
+                    const selectEl = div.querySelector('.shop-select');
+                    selectEl.addEventListener('change', updateSelectedShops);
                 }
 
-                // Event: update selected_shops
-                shopSelect.addEventListener('change', function() {
-                    selected_shops = Array.from(this.selectedOptions).map(o => o.value);
+                // ===== Update selected shops array =====
+                function updateSelectedShops() {
+                    selected_shops = Array.from(container.querySelectorAll('.shop-select'))
+                        .map(s => s.value)
+                        .filter(v => v);
                     console.log('Selected shops:', selected_shops);
+                }
+
+                // ===== Initialize event listeners =====
+                container.querySelectorAll('.shop-select').forEach(selectEl => {
+                    selectEl.addEventListener('change', updateSelectedShops);
                 });
 
-                // Initialize selected_shops
-                selected_shops = Array.from(shopSelect.selectedOptions).map(o => o.value);
-                console.log('Initial selected shops:', selected_shops);
+                container.querySelectorAll('.remove-shop').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        e.target.closest('.shop-row').remove();
+                        updateSelectedShops();
+                    });
+                });
 
-            } else {
-                console.error("Failed to load shops:", response);
+                addBtn.addEventListener('click', () => addShopRow());
+
+                // Initial selected shops
+                updateSelectedShops();
             }
         });
     });
