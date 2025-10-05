@@ -57,24 +57,24 @@ function oopos_connector_page() {
     <h3>Select your shops</h3>
 
     <?php if (!empty($shops)) : ?>
-        <div id="shops-container">
-            <!-- Main shop row -->
-            <div class="shop-row">
-                <label>Main Shop:</label>
-                <select name="oopos_connector_data[shop_selected][]" class="shop-select" required>
-                    <option value="">-- Choose main shop --</option>
-                    <?php foreach ($shops as $shop_name): ?>
-                        <option value="<?php echo esc_attr($shop_name); ?>"
-                            <?php selected($data['shop_selected'][0] ?? '', $shop_name); ?>>
-                            <?php echo esc_html($shop_name); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+        <div id="shops-container" style="display:flex; flex-direction: column; gap:8px;">
+            <?php foreach ($shops as $index => $shop_name): ?>
+                <label class="shop-checkbox">
+                    <input type="checkbox" 
+                           name="oopos_connector_data[shop_selected][]" 
+                           value="<?php echo esc_attr($shop_name); ?>"
+                           <?php 
+                                if (!empty($data['shop_selected']) && in_array($shop_name, $data['shop_selected'])) {
+                                    echo 'checked';
+                                }
+                           ?>
+                           <?php echo $index === 0 ? 'data-main="true"' : ''; ?>
+                    >
+                    <?php echo esc_html($shop_name); ?>
+                    <?php if ($index === 0) echo ' (Main)'; ?>
+                </label>
+            <?php endforeach; ?>
         </div>
-
-        <button type="button" id="add-shop">+ Add Another Shop</button><br><br>
-
     <?php else : ?>
         <p style="color:red;">⚠️ No shops found. Please test the connection first.</p>
     <?php endif; ?>

@@ -115,11 +115,17 @@ addBtn.addEventListener('click', function(e) {
 
 // Update selected_shops array
 function updateSelectedShops() {
-    selected_shops = Array.from(container.querySelectorAll('.shop-select'))
-        .map(s => s.value)
-        .filter(v => v);
+    selected_shops = Array.from(container.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(input => input.value);
     console.log('Selected shops:', selected_shops);
 }
+
+// Event listener for all checkboxes
+container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', updateSelectedShops);
+});
+
+// Initialize selected_shops
 updateSelectedShops();
 
                 // ===== Initialize event listeners =====
