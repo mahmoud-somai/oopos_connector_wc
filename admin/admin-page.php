@@ -84,6 +84,7 @@ function oopos_connector_page() {
 </div>
 
 
+
                 <!-- Step 3 -->
                 <div class="step" id="step3">
                     <h3>Choose your attributes</h3>

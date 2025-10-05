@@ -95,32 +95,32 @@ function addShopRow(selected = '') {
     `;
     container.appendChild(div);
 
-    const removeBtn = div.querySelector('.remove-shop');
-    removeBtn.addEventListener('click', () => {
+    // Remove row
+    div.querySelector('.remove-shop').addEventListener('click', () => {
         div.remove();
         updateSelectedShops();
     });
 
-    const selectEl = div.querySelector('.shop-select');
-    selectEl.addEventListener('change', updateSelectedShops);
+    // Update selected_shops when changed
+    div.querySelector('.shop-select').addEventListener('change', updateSelectedShops);
 
     updateSelectedShops();
 }
 
-// Ensure the add button works
+// Attach add button **after AJAX shops loaded**
 addBtn.addEventListener('click', function(e) {
-    e.preventDefault(); // prevent any default button behavior
+    e.preventDefault();
     addShopRow();
 });
 
-// Update selected_shops
+// Update selected_shops array
 function updateSelectedShops() {
     selected_shops = Array.from(container.querySelectorAll('.shop-select'))
         .map(s => s.value)
         .filter(v => v);
     console.log('Selected shops:', selected_shops);
 }
-
+updateSelectedShops();
 
                 // ===== Initialize event listeners =====
                 container.querySelectorAll('.shop-select').forEach(selectEl => {
