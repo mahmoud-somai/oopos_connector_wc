@@ -51,39 +51,27 @@ function oopos_connector_page() {
 
                 <!-- Step 2 -->
                
+<!-- Step 2 -->
 <div class="step" id="step2" style="display:none;">
     <h3>Select your shops</h3>
 
     <?php if (!empty($shops)) : ?>
-        <label>Main Shop:</label><br>
-        <select name="oopos_connector_data[shop1]">
-            <?php foreach ($shops as $shop_name): ?>
-                <option value="<?php echo esc_attr($shop_name); ?>" 
-                    <?php selected($data['shop1'] ?? '', $shop_name); ?>>
-                    <?php echo esc_html($shop_name); ?>
-                </option>
-            <?php endforeach; ?>
-        </select><br><br>
-
-        <label>Shop 2:</label><br>
-        <select name="oopos_connector_data[shop2]">
-            <?php foreach ($shops as $shop_name): ?>
-                <option value="<?php echo esc_attr($shop_name); ?>" 
-                    <?php selected($data['shop2'] ?? '', $shop_name); ?>>
-                    <?php echo esc_html($shop_name); ?>
-                </option>
-            <?php endforeach; ?>
-        </select><br><br>
-
-        <label>Shop 3:</label><br>
-        <select name="oopos_connector_data[shop3]">
-            <?php foreach ($shops as $shop_name): ?>
-                <option value="<?php echo esc_attr($shop_name); ?>" 
-                    <?php selected($data['shop3'] ?? '', $shop_name); ?>>
-                    <?php echo esc_html($shop_name); ?>
-                </option>
-            <?php endforeach; ?>
-        </select><br><br>
+        <?php
+        // Loop over the number of shops
+        for ($i = 0; $i < count($shops); $i++) :
+            $label = ($i === 0) ? "Main Shop" : "Shop " . ($i + 1);
+            $select_name = "shop" . ($i + 1);
+        ?>
+            <label><?php echo esc_html($label); ?>:</label><br>
+            <select name="oopos_connector_data[<?php echo esc_attr($select_name); ?>]">
+                <?php foreach ($shops as $shop_name): ?>
+                    <option value="<?php echo esc_attr($shop_name); ?>" 
+                        <?php selected($data[$select_name] ?? '', $shop_name); ?>>
+                        <?php echo esc_html($shop_name); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select><br><br>
+        <?php endfor; ?>
 
     <?php else : ?>
         <p style="color:red;">⚠️ No shops found. Please test the connection first.</p>
@@ -92,6 +80,7 @@ function oopos_connector_page() {
     <button type="button" id="back-step1">Previous</button>
     <button type="button" id="to-step3">Next</button>
 </div>
+
                 <!-- Step 3 -->
                 <div class="step" id="step3">
                     <h3>Choose your attributes</h3>
