@@ -3,7 +3,7 @@ function oopos_connector_page() {
     $data = get_option('oopos_connector_data', array());
     ?>
     <div class="wrap">
-        <h1>WELCOME TO OOPOS CONNECTOR BY MAHMOUD</h1>
+        <h1>WELCOME TO OOPOS CONNECTOR BY IDVEY</h1>
 
         <div class="oopos-card">
             <h2>Connector Settings</h2>
