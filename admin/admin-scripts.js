@@ -47,6 +47,38 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Main shop select not found: expected select[name="oopos_connector_data[main_shop]"]');
         return;
     }
+function loadShopsIfNeeded(callback) {
+    const loadingText = document.createElement('p');
+    loadingText.id = 'shops-loading';
+    loadingText.textContent = 'Loading shops... please wait.';
+    step2.appendChild(loadingText);
+
+    const existingOptions = Array.from(mainSelect.options).map(opt => opt.value).filter(v => v);
+    if (existingOptions.length > 0) {
+        allShops = existingOptions;
+        loadingText.remove();
+        callback?.();
+        return;
+    }
+
+    jQuery.post(wt_iew_ajax.ajax_url, {
+        action: 'oopos_get_shops',
+        _wpnonce: wt_iew_ajax.nonce
+    })
+    .done(response => {
+        if (response.success && Array.isArray(response.data)) {
+            allShops = response.data;
+            buildOptionsFor(mainSelect, allShops, true);
+        } else {
+            alert('Failed to load shops.');
+        }
+    })
+    .fail(() => alert('Error connecting to server.'))
+    .always(() => {
+        loadingText.remove();
+        callback?.();
+    });
+}
 
     // Helper: build options for a select from an array of shop names
     function buildOptionsFor(selectEl, optionsArray, includePlaceholder = true) {
@@ -81,6 +113,8 @@ document.addEventListener('DOMContentLoaded', function () {
         selected_shops.push(...extras);
         console.log('selected_shops:', selected_shops);
     }
+
+    
 
     // Update all extra selects options to exclude main and other selected extras
     function refreshAllExtraSelects() {
