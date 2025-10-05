@@ -82,12 +82,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 const addBtn = document.getElementById('add-shop');
 
                 // ===== Functions =====
-                function updateSelectedShops() {
-                    selected_shops = Array.from(container.querySelectorAll('.shop-select'))
-                        .map(select => select.value)
-                        .filter(v => v);
-                    console.log('Selected shops:', selected_shops);
-                }
+function updateSelectedShops() {
+    selected_shops = [];
+
+    // Add checked checkboxes
+    container.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+        selected_shops.push(checkbox.value);
+    });
+
+    // Add selected values from dynamic selects
+    container.querySelectorAll('.shop-select').forEach(select => {
+        if (select.value) selected_shops.push(select.value);
+    });
+
+    console.log('Selected shops:', selected_shops);
+}
+
 
                 function addShopRow(selected = '') {
                     const div = document.createElement('div');
