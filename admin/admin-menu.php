@@ -59,7 +59,7 @@ function wt_iew_test_connection() {
             'enseigne' => $enseigne,
             'api_key'  => $api_key
         );
-        update_option('wt_iew_advanced_settings', $settings);
+        update_option('oopos_connector_data', $settings);
 
         // ✅ Save the shop response
         if (!empty($data)) {
@@ -99,7 +99,7 @@ function wt_iew_save_step1() {
     );
 
     // Save to database
-    update_option('wt_iew_advanced_settings', $data);
+    update_option('oopos_connector_data', $data);
 
     wp_send_json_success('Step 1 saved successfully');
 }
