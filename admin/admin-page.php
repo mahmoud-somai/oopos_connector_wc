@@ -56,24 +56,32 @@ function oopos_connector_page() {
     <h3>Select your shops</h3>
 
     <?php if (!empty($shops)) : ?>
-        <?php
-        // Loop over the number of shops
-        for ($i = 0; $i < count($shops); $i++) :
-            $label = ($i === 0) ? "Main Shop" : "Shop " . ($i + 1);
-            $select_name = "shop" . ($i + 1);
-        ?>
-            <label><?php echo esc_html($label); ?>:</label><br>
-            <select name="oopos_connector_data[<?php echo esc_attr($select_name); ?>]">
-                <!-- Placeholder option -->
-                <option value="">-- Choose a shop --</option>
-                <?php foreach ($shops as $shop_name): ?>
-                    <option value="<?php echo esc_attr($shop_name); ?>" 
-                        <?php selected($data[$select_name] ?? '', $shop_name); ?>>
-                        <?php echo esc_html($shop_name); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select><br><br>
-        <?php endfor; ?>
+        <!-- Main Shop -->
+        <label>Main Shop:</label><br>
+        <select name="oopos_connector_data[main_shop]" required>
+            <option value="">-- Choose main shop --</option>
+            <?php foreach ($shops as $shop_name): ?>
+                <option value="<?php echo esc_attr($shop_name); ?>" 
+                    <?php selected($data['main_shop'] ?? '', $shop_name); ?>>
+                    <?php echo esc_html($shop_name); ?>
+                </option>
+            <?php endforeach; ?>
+        </select><br><br>
+
+        <!-- Extra Shops (Multi-select) -->
+        <label>Extra Shops:</label><br>
+        <select name="oopos_connector_data[extra_shops][]" multiple size="10">
+            <?php foreach ($shops as $shop_name): ?>
+                <option value="<?php echo esc_attr($shop_name); ?>"
+                    <?php 
+                        if (!empty($data['extra_shops']) && in_array($shop_name, $data['extra_shops'])) {
+                            echo 'selected';
+                        }
+                    ?>>
+                    <?php echo esc_html($shop_name); ?>
+                </option>
+            <?php endforeach; ?>
+        </select><br><br>
 
     <?php else : ?>
         <p style="color:red;">⚠️ No shops found. Please test the connection first.</p>
@@ -82,6 +90,7 @@ function oopos_connector_page() {
     <button type="button" id="back-step1">Previous</button>
     <button type="button" id="to-step3">Next</button>
 </div>
+
 
 
                 <!-- Step 3 -->
