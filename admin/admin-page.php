@@ -109,8 +109,9 @@ function oopos_connector_page() {
     <input type="text" id="color" name="oopos_settings_basic_attribute[color]" 
            value="<?php echo esc_attr($saved_attributes['color'] ?? ''); ?>"><br><br>
 
-    <button type="button" id="back-step2">Previous</button>
-    <button type="button" id="to-step4">Next</button>
+<button type="button" id="back-step3">Previous</button>
+<button type="button" id="to-step4">Next</button>
+
 </div>
 
 
