@@ -10,8 +10,13 @@ function oopos_connector_admin_assets($hook) {
     wp_enqueue_script('oopos-connector-admin-js', plugin_dir_url(__FILE__) . 'admin-scripts.js', array('jquery'), false, true);
 
     // Localize script for AJAX
-    wp_localize_script('oopos-connector-admin-js', 'wt_iew_ajax', array(
+    // wp_localize_script('oopos-connector-admin-js', 'wt_iew_ajax', array(
+    //     'ajax_url' => admin_url('admin-ajax.php'),
+    //     'nonce'    => wp_create_nonce('wt_iew_nonce')
+    // ));
+
+        wp_localize_script('oopos-admin-js', 'oopos_ajax', [
         'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce'    => wp_create_nonce('wt_iew_nonce')
-    ));
+        'nonce'    => wp_create_nonce('oopos_connector_nonce')
+    ]);
 }
