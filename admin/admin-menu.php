@@ -214,6 +214,52 @@ function oopos_save_attributes() {
 
     wp_send_json_success(['message' => 'Attributes saved successfully']);
 }
+*
+
+add_action('wp_ajax_oopos_save_extra_attributes', 'oopos_save_extra_attributes');
+function oopos_save_extra_attributes() {
+    check_ajax_referer('wt_iew_nonce', '_wpnonce');
+
+    if (!isset($_POST['extra_attributes']) || !is_array($_POST['extra_attributes'])) {
+        wp_send_json_error(['message' => 'No attributes provided']);
+    }
+
+    $extra_attributes = array_map('sanitize_text_field', $_POST['extra_attributes']);
+
+    // Save in options
+    update_option('oopos_settings_extra_attribute', $extra_attributes);
+
+    // Save as WooCommerce attributes
+    if (function_exists('wc_create_attribute')) {
+        $existing_attributes = wc_get_attribute_taxonomies();
+        $existing_slugs = array_column($existing_attributes, 'attribute_name');
+
+        global $wpdb;
+
+        foreach ($extra_attributes as $attr) {
+            $slug = sanitize_title($attr); // slug same as user input
+            if (!in_array($slug, $existing_slugs)) {
+                wc_create_attribute([
+                    'name' => $attr,
+                    'slug' => $slug,
+                    'type' => 'select',
+                    'order_by' => 'menu_order',
+                    'has_archives' => false,
+                ]);
+            } else {
+                // update label if it exists but name changed (optional)
+                $wpdb->update(
+                    $wpdb->prefix . 'woocommerce_attribute_taxonomies',
+                    ['attribute_label' => $attr],
+                    ['attribute_name' => $slug]
+                );
+                wc_clear_attribute_cache();
+            }
+        }
+    }
+
+    wp_send_json_success(['message' => 'Extra attributes saved successfully']);
+}
 
 
 

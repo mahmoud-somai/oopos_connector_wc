@@ -262,9 +262,9 @@ if (saveExtraBtn) {
         }, function (response) {
             if (response.success) {
                 alert('Extra attributes saved successfully!');
-                // Optionally go to next step
+                // optionally navigate to next step
             } else {
-                alert('Error saving extra attributes.');
+                alert(response.data?.message || 'Error saving extra attributes.');
             }
         }).fail(function (err) {
             console.error('AJAX error saving extra attributes:', err);
@@ -293,6 +293,6 @@ if (backStep4Btn) {
 
     // Initialize to step 1
     showStep(step1);
-    
+
 
 });
