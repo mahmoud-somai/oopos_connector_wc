@@ -131,6 +131,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+
+    if (toStep4Btn) {
+    toStep4Btn.addEventListener('click', () => {
+        const size = document.getElementById('size')?.value.trim() || '';
+        const color = document.getElementById('color')?.value.trim() || '';
+
+        if (!size && !color) {
+            alert('Please fill at least one attribute (size or color)');
+            return;
+        }
+
+        jQuery.post(wt_iew_ajax.ajax_url, {
+            action: 'save_basic_attributes',
+            size: size,
+            color: color,
+            _wpnonce: wt_iew_ajax.nonce
+        }, function(response) {
+            if (response.success) {
+                console.log('✅ Attributes saved:', response.data);
+                step3.style.display = 'none';
+                step4.style.display = 'block';
+            } else {
+                alert('⚠️ Error saving attributes.');
+                console.error(response);
+            }
+        });
+    });
+}
     // ===== Add Extra Attribute Field =====
     if (addExtraBtn) {
         addExtraBtn.addEventListener('click', () => {

@@ -149,22 +149,61 @@ function save_selected_shops_option_callback() {
 }
 
 // ✅ Save Size and Color attributes (Step 3)
-add_action('admin_init', 'oopos_save_basic_attributes');
-function oopos_save_basic_attributes() {
-    if (
-        isset($_POST['oopos_settings_basic_attribute']) &&
-        isset($_POST['oopos_attributes_nonce']) &&
-        wp_verify_nonce($_POST['oopos_attributes_nonce'], 'save_oopos_attributes')
-    ) {
-        $attributes = [
-            'size'  => sanitize_text_field($_POST['oopos_settings_basic_attribute']['size']),
-            'color' => sanitize_text_field($_POST['oopos_settings_basic_attribute']['color']),
-        ];
+add_action('wp_ajax_save_basic_attributes', function() {
+    check_ajax_referer('wt_iew_nonce', '_wpnonce');
 
-        update_option('oopos_settings_basic_attribute', $attributes);
+    $size = sanitize_text_field($_POST['size'] ?? '');
+    $color = sanitize_text_field($_POST['color'] ?? '');
+
+    $saved_attributes = get_option('oopos_settings_extra_attributes', []);
+
+    if (!is_array($saved_attributes)) {
+        $saved_attributes = [];
     }
-}
 
+    // Update local option
+    $new_attributes = [];
+    if ($size) $new_attributes[] = $size;
+    if ($color) $new_attributes[] = $color;
+
+    $merged = array_unique(array_merge($saved_attributes, $new_attributes));
+    update_option('oopos_settings_extra_attributes', $merged);
+
+    // === Create WooCommerce attributes if not exist ===
+    if (class_exists('WC_Product_Attribute')) {
+        foreach ($new_attributes as $attr_name) {
+            $taxonomy = 'pa_' . wc_sanitize_taxonomy_name($attr_name);
+
+            if (!taxonomy_exists($taxonomy)) {
+                $attribute_data = array(
+                    'attribute_label' => ucfirst($attr_name),
+                    'attribute_name'  => wc_sanitize_taxonomy_name($attr_name),
+                    'attribute_type'  => 'select',
+                    'attribute_orderby' => 'menu_order',
+                    'attribute_public' => 1,
+                );
+
+                global $wpdb;
+                $wpdb->insert(
+                    $wpdb->prefix . 'woocommerce_attribute_taxonomies',
+                    $attribute_data
+                );
+
+                delete_transient('wc_attribute_taxonomies');
+                register_taxonomy(
+                    $taxonomy,
+                    array('product'),
+                    array('hierarchical' => false, 'label' => ucfirst($attr_name))
+                );
+            }
+        }
+    }
+
+    wp_send_json_success([
+        'saved' => $merged,
+        'created' => $new_attributes,
+    ]);
+});
 
 // ✅ AJAX : Save Extra Attributes and Create them in WooCommerce
 add_action('wp_ajax_save_extra_attributes', 'oopos_save_extra_attributes');

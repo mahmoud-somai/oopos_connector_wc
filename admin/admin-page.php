@@ -115,7 +115,8 @@ function oopos_connector_page() {
                value="<?php echo esc_attr($saved_attributes['color'] ?? ''); ?>"><br><br>
 
         <button type="button" id="back-step2">Previous</button>
-        <?php submit_button('Save Settings'); ?>
+        <button type="button" id="to-step4">Next</button>
+        
     </form>
 </div>
 
@@ -152,6 +153,7 @@ function oopos_connector_page() {
 
     <button type="button" id="back-step3" class="button">Previous</button>
     <?php submit_button('Save Extra Attributes'); ?>
+    
 </div>
 
             </form>
