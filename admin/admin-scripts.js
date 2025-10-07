@@ -183,17 +183,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ===== Step 3 -> Step 4 (save basic attrs via AJAX then show step4) =====
-if (btnToStep4) {
-    btnToStep4.addEventListener('click', function () {
-        showStep(step4);
-    });
-}
+    if (btnToStep4) {
+        btnToStep4.addEventListener('click', function () {
+            showStep(step4);
+        });
+    }
 
-if (btnBackStep3) {
-    btnBackStep3.addEventListener('click', function () {
-        showStep(step3);
-    });
-}
+    if (btnBackStep3) {
+        btnBackStep3.addEventListener('click', function () {
+            showStep(step3);
+        });
+    }
 
     // ===== Shops checkbox change delegation (works if container dynamically replaced) =====
     if (shopsContainer) {
