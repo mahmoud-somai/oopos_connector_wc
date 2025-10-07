@@ -183,9 +183,30 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ===== Step 3 -> Step 4 (save basic attrs via AJAX then show step4) =====
-    if (btnToStep4) {
+ if (btnToStep4) {
         btnToStep4.addEventListener('click', function () {
-            showStep(step4);
+            const sizeVal = inputSize.value.trim();
+            const colorVal = inputColor.value.trim();
+
+            if (!sizeVal && !colorVal) {
+                alert('Please enter at least one attribute');
+                return;
+            }
+
+            // AJAX request to save
+            jQuery.post(oopos_ajax.ajax_url, {
+                action: 'oopos_save_attributes',
+                size: sizeVal,
+                color: colorVal,
+                _wpnonce: oopos_ajax.nonce
+            }, function (response) {
+                if (response.success) {
+                    console.log(response.data.message);
+                    showStep(step4);
+                } else {
+                    alert('Error saving attributes');
+                }
+            });
         });
     }
 

@@ -148,119 +148,61 @@ function save_selected_shops_option_callback() {
     }
 }
 
-// ✅ Save Size and Color attributes (Step 3)
-add_action('wp_ajax_save_basic_attributes', function() {
-    check_ajax_referer('wt_iew_nonce', '_wpnonce');
+// Save Step 3 attributes
+add_action('wp_ajax_oopos_save_attributes', 'oopos_save_attributes');
+function oopos_save_attributes() {
+    // Security check
+    check_ajax_referer('oopos_connector_nonce', '_wpnonce');
 
-    $size = sanitize_text_field($_POST['size'] ?? '');
+    $size  = sanitize_text_field($_POST['size'] ?? '');
     $color = sanitize_text_field($_POST['color'] ?? '');
 
-    $saved_attributes = get_option('oopos_settings_extra_attributes', []);
+    $saved_attributes = get_option('oopos_settings_basic_attribute', []);
+    $saved_attributes['size']  = $size;
+    $saved_attributes['color'] = $color;
 
-    if (!is_array($saved_attributes)) {
-        $saved_attributes = [];
-    }
+    update_option('oopos_settings_basic_attribute', $saved_attributes);
 
-    // Update local option
-    $new_attributes = [];
-    if ($size) $new_attributes[] = $size;
-    if ($color) $new_attributes[] = $color;
-
-    $merged = array_unique(array_merge($saved_attributes, $new_attributes));
-    update_option('oopos_settings_extra_attributes', $merged);
-
-    // === Create WooCommerce attributes if not exist ===
+    // Add as WooCommerce product attributes if not exist
     if (class_exists('WC_Product_Attribute')) {
-        foreach ($new_attributes as $attr_name) {
-            $taxonomy = 'pa_' . wc_sanitize_taxonomy_name($attr_name);
+        global $wpdb;
 
-            if (!taxonomy_exists($taxonomy)) {
-                $attribute_data = array(
-                    'attribute_label' => ucfirst($attr_name),
-                    'attribute_name'  => wc_sanitize_taxonomy_name($attr_name),
-                    'attribute_type'  => 'select',
-                    'attribute_orderby' => 'menu_order',
-                    'attribute_public' => 1,
-                );
+        $attributes = wc_get_attribute_taxonomies();
 
-                global $wpdb;
-                $wpdb->insert(
-                    $wpdb->prefix . 'woocommerce_attribute_taxonomies',
-                    $attribute_data
-                );
+        foreach (['size' => $size, 'color' => $color] as $name => $value) {
+            if ($value) {
+                $exists = false;
+                foreach ($attributes as $attr) {
+                    if (strtolower($attr->attribute_name) === strtolower($name)) {
+                        $exists = true;
+                        break;
+                    }
+                }
 
-                delete_transient('wc_attribute_taxonomies');
-                register_taxonomy(
-                    $taxonomy,
-                    array('product'),
-                    array('hierarchical' => false, 'label' => ucfirst($attr_name))
-                );
+                if (!$exists) {
+                    // create WooCommerce attribute
+                    $attribute_id = wc_create_attribute([
+                        'name'         => ucfirst($name),
+                        'slug'         => sanitize_title($name),
+                        'type'         => 'select',
+                        'order_by'     => 'menu_order',
+                        'has_archives' => false,
+                    ]);
+
+                    if ($attribute_id && taxonomy_exists('pa_' . sanitize_title($name))) {
+                        $term = wp_insert_term($value, 'pa_' . sanitize_title($name));
+                    }
+                } else {
+                    // Attribute exists, optionally add term
+                    $taxonomy = 'pa_' . sanitize_title($name);
+                    if (!term_exists($value, $taxonomy)) {
+                        wp_insert_term($value, $taxonomy);
+                    }
+                }
             }
         }
     }
 
-    wp_send_json_success([
-        'saved' => $merged,
-        'created' => $new_attributes,
-    ]);
-});
-
-// ✅ AJAX : Save Extra Attributes and Create them in WooCommerce
-add_action('wp_ajax_save_extra_attributes', 'oopos_save_extra_attributes');
-function oopos_save_extra_attributes() {
-    check_ajax_referer('wt_iew_nonce', '_wpnonce');
-
-    if (!isset($_POST['extra_attributes']) || !is_array($_POST['extra_attributes'])) {
-        wp_send_json_error('No attributes received.');
-    }
-
-    $attributes = array_map('sanitize_text_field', $_POST['extra_attributes']);
-
-    // Save in WP option
-    update_option('oopos_settings_extra_attributes', $attributes);
-
-    global $wpdb;
-    $table = $wpdb->prefix . 'woocommerce_attribute_taxonomies';
-
-    foreach ($attributes as $attr_name) {
-        $slug = wc_sanitize_taxonomy_name($attr_name);
-
-        // Check if already exists
-        $exists = $wpdb->get_var($wpdb->prepare(
-            "SELECT attribute_id FROM $table WHERE attribute_name = %s",
-            $slug
-        ));
-
-        if (!$exists) {
-            // Insert attribute into WooCommerce table
-            $wpdb->insert($table, array(
-                'attribute_name'    => $slug,
-                'attribute_label'   => $attr_name,
-                'attribute_type'    => 'select',
-                'attribute_orderby' => 'menu_order',
-                'attribute_public'  => 1,
-            ));
-        }
-
-        // Register the taxonomy (important for immediate recognition)
-        $taxonomy = 'pa_' . $slug;
-        if (!taxonomy_exists($taxonomy)) {
-            register_taxonomy(
-                $taxonomy,
-                array('product'),
-                array(
-                    'label' => ucfirst($attr_name),
-                    'public' => true,
-                    'show_ui' => true,
-                    'hierarchical' => false,
-                )
-            );
-        }
-    }
-
-    // Refresh WooCommerce attributes cache
-    delete_transient('wc_attribute_taxonomies');
-    wc_clear_cached_transients();
-
-    wp_send_json_success('Attributes saved and created successfully!');
+    wp_send_json_success(['message' => 'Attributes saved']);
 }
+
