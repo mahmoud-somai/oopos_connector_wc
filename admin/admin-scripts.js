@@ -132,33 +132,41 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
-    if (toStep4Btn) {
-    toStep4Btn.addEventListener('click', () => {
-        const size = document.getElementById('size')?.value.trim() || '';
-        const color = document.getElementById('color')?.value.trim() || '';
+       if (toStep4Btn && step3 && step4) {
+        toStep4Btn.addEventListener('click', function() {
+            const size = document.getElementById('size')?.value.trim() || '';
+            const color = document.getElementById('color')?.value.trim() || '';
 
-        if (!size && !color) {
-            alert('Please fill at least one attribute (size or color)');
-            return;
-        }
-
-        jQuery.post(wt_iew_ajax.ajax_url, {
-            action: 'save_basic_attributes',
-            size: size,
-            color: color,
-            _wpnonce: wt_iew_ajax.nonce
-        }, function(response) {
-            if (response.success) {
-                console.log('✅ Attributes saved:', response.data);
-                step3.style.display = 'none';
-                step4.style.display = 'block';
-            } else {
-                alert('⚠️ Error saving attributes.');
-                console.error(response);
+            if (!size && !color) {
+                alert('Please fill at least one attribute (size or color)');
+                return;
             }
+
+            jQuery.post(wt_iew_ajax.ajax_url, {
+                action: 'save_basic_attributes',
+                size: size,
+                color: color,
+                _wpnonce: wt_iew_ajax.nonce
+            }, function(response) {
+                console.log('Response from AJAX:', response);
+                if (response.success) {
+                    console.log('✅ Attributes saved:', response.data);
+                    step3.style.display = 'none';
+                    step4.style.display = 'block';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert('⚠️ Error saving attributes.');
+                    console.error(response);
+                }
+            }).fail(function(err) {
+                console.error('AJAX error:', err);
+                alert('An error occurred while saving attributes.');
+            });
         });
-    });
-}
+    } else {
+        console.warn('⚠️ Missing element for step 3 → step 4 navigation.');
+    }
+
     // ===== Add Extra Attribute Field =====
     if (addExtraBtn) {
         addExtraBtn.addEventListener('click', () => {
