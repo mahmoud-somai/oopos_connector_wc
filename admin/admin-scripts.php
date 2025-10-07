@@ -9,6 +9,29 @@ function oopos_connector_admin_assets($hook) {
     // JS
     wp_enqueue_script('oopos-connector-admin-js', plugin_dir_url(__FILE__) . 'admin-scripts.js', array('jquery'), false, true);
 
+
+        // Get existing WC attributes
+    $wc_attributes = array();
+    if (function_exists('wc_get_attribute_taxonomies')) {
+        $taxonomies = wc_get_attribute_taxonomies();
+        foreach ($taxonomies as $tax) {
+            if (in_array($tax->attribute_name, ['size', 'color'])) {
+                $wc_attributes[$tax->attribute_name] = $tax->attribute_label;
+            }
+        }
+    }
+        // Get existing WC attributes
+    $wc_attributes = array();
+    if (function_exists('wc_get_attribute_taxonomies')) {
+        $taxonomies = wc_get_attribute_taxonomies();
+        foreach ($taxonomies as $tax) {
+            if (in_array($tax->attribute_name, ['size', 'color'])) {
+                $wc_attributes[$tax->attribute_name] = $tax->attribute_label;
+            }
+        }
+    }
+
+        wp_localize_script('oopos-connector-admin-js', 'oopos_wc_attributes', $wc_attributes);
     // Localize script for AJAX
     wp_localize_script('oopos-connector-admin-js', 'wt_iew_ajax', array(
         'ajax_url' => admin_url('admin-ajax.php'),

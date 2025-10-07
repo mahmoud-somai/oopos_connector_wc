@@ -32,20 +32,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnBackStep3 = document.getElementById('back-step3');
     const btnToStep4 = document.getElementById('to-step4');
 
-    const btnBackStep4 = document.getElementById('back-step4');
+   
 
     // ===== Step 4 Extras =====
-    const addExtraBtn = document.getElementById('add-extra-attribute');
     const extrasContainer = document.getElementById('extra-attributes-container');
-
-    // ===== State =====
-    let selected_shops = [];
-
-    // ===== Helpers =====
-    function showStep(el) {
-        stepEls.forEach(s => { if (!s) return; s.style.display = (s === el) ? 'block' : 'none'; });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    const addExtraBtn = document.getElementById('add-extra-attribute');
+    const saveExtraBtn = document.getElementById('save-extra-attributes');
+    const skipExtraBtn = document.getElementById('skip-extra-attributes');
+    const backStep4Btn = document.getElementById('back-step4');
 
     function updateSelectedShops() {
         selected_shops = [];
@@ -160,11 +154,22 @@ if (btnToStep4) {
         const sizeLabel = inputSize?.value.trim() || '';
         const colorLabel = inputColor?.value.trim() || '';
 
+        const existingSize = oopos_wc_attributes?.size || '';
+        const existingColor = oopos_wc_attributes?.color || '';
+
+        // If both match WC existing attributes, just navigate
+        if (sizeLabel === existingSize && colorLabel === existingColor) {
+            showStep(step4);
+            return;
+        }
+
+        // If inputs empty, alert
         if (!sizeLabel && !colorLabel) {
             alert('Please enter at least one attribute');
             return;
         }
 
+        // Save/update WC attributes via AJAX
         jQuery.post(wt_iew_ajax.ajax_url, {
             action: 'oopos_save_attributes',
             sizeLabel: sizeLabel,
@@ -172,7 +177,7 @@ if (btnToStep4) {
             _wpnonce: wt_iew_ajax.nonce
         }, function (response) {
             if (response.success) {
-                console.log(response.data.message || 'Attributes saved');
+                console.log(response.data.message || 'Attributes saved/updated');
                 showStep(step4);
             } else {
                 alert(response.data?.message || 'Error saving attributes');
@@ -185,8 +190,9 @@ if (btnToStep4) {
 }
 
 
-    if (btnBackStep3) btnBackStep3.addEventListener('click', function () { showStep(step3); });
-    if (btnBackStep4) btnBackStep4.addEventListener('click', function () { showStep(step3); });
+
+    if (btnBackStep3) btnBackStep3.addEventListener('click', function () { showStep(step2); });
+    
 
     // ===== Shops change handler =====
     if (shopsContainer) {
@@ -196,46 +202,90 @@ if (btnToStep4) {
     }
 
     // ===== Extras attributes (Step 4) =====
-    function createExtraRow(value = '') {
-        const row = document.createElement('div');
-        row.className = 'extra-attribute-row';
-        row.style.display = 'flex';
-        row.style.alignItems = 'center';
-        row.style.gap = '10px';
-        row.style.marginBottom = '8px';
+function createExtraRow(value = '') {
+    const row = document.createElement('div');
+    row.className = 'extra-attribute-row';
 
-        const label = document.createElement('label');
-        label.textContent = 'Extra attribute:';
-        label.style.marginRight = '6px';
+    const label = document.createElement('label');
+    label.textContent = 'Extra attribute:';
 
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.name = 'oopos_settings_extra_attributes[]';
-        input.value = value;
-        input.placeholder = 'Extra attribute';
-        input.style.flex = '1';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.name = 'oopos_settings_extra_attributes[]';
+    input.value = value;
+    input.placeholder = 'Extra attribute';
+    input.style.flex = '1';
 
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'button button-secondary remove-attribute';
-        removeBtn.textContent = 'Remove';
-        removeBtn.addEventListener('click', function () { row.remove(); });
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'button button-secondary remove-attribute';
+    removeBtn.textContent = 'Remove';
+    removeBtn.addEventListener('click', function () {
+        row.remove();
+    });
 
-        row.appendChild(label);
-        row.appendChild(input);
-        row.appendChild(removeBtn);
+    row.appendChild(label);
+    row.appendChild(input);
+    row.appendChild(removeBtn);
 
-        return row;
-    }
+    return row;
+}
 
-    if (addExtraBtn && extrasContainer) {
-        addExtraBtn.addEventListener('click', function () {
-            const row = createExtraRow('');
-            extrasContainer.appendChild(row);
-            row.querySelector('input[name="oopos_settings_extra_attributes[]"]')?.focus();
+// Add first row
+if (extrasContainer) extrasContainer.appendChild(createExtraRow(''));
+
+// Add more rows
+if (addExtraBtn) {
+    addExtraBtn.addEventListener('click', function () {
+        const newRow = createExtraRow('');
+        extrasContainer.appendChild(newRow);
+        newRow.querySelector('input')?.focus();
+    });
+}
+
+// Save extra attributes
+if (saveExtraBtn) {
+    saveExtraBtn.addEventListener('click', function () {
+        const extraValues = Array.from(document.querySelectorAll('input[name="oopos_settings_extra_attributes[]"]'))
+            .map(input => input.value.trim())
+            .filter(val => val !== '');
+
+        if (!extraValues.length) {
+            alert('Please enter at least one extra attribute or click Skip.');
+            return;
+        }
+
+        jQuery.post(wt_iew_ajax.ajax_url, {
+            action: 'oopos_save_extra_attributes',
+            extra_attributes: extraValues,
+            _wpnonce: wt_iew_ajax.nonce
+        }, function (response) {
+            if (response.success) {
+                alert('Extra attributes saved successfully!');
+                // Optionally go to next step
+            } else {
+                alert('Error saving extra attributes.');
+            }
+        }).fail(function (err) {
+            console.error('AJAX error saving extra attributes:', err);
+            alert('AJAX error, check console.');
         });
-    }
+    });
+}
 
+// Skip button
+if (skipExtraBtn) {
+    skipExtraBtn.addEventListener('click', function () {
+        alert('Skipped extra attributes.');
+    });
+}
+
+// Back button
+if (backStep4Btn) {
+    backStep4Btn.addEventListener('click', function () {
+        showStep(step3); // assuming step3 exists
+    });
+}
     showStep(step1 || stepEls[0] || null);
 
 });
