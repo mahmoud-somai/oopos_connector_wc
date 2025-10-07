@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===== Step 3 Elements =====
     const inputSize = document.getElementById('size');
     const inputColor = document.getElementById('color');
+
     const btnBackStep3 = document.getElementById('back-step3');
     const btnToStep4 = document.getElementById('to-step4');
 
