@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    'use strict';
 
-    const $ = jQuery;
 
     // Steps
     const stepEls = Array.from(document.querySelectorAll('.step'));
@@ -31,8 +29,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnBackStep2 = document.getElementById('back-step2');
 
     // Step3 -> Step4
-    const btnToStep4 = document.getElementById('to-step4');
     const btnBackStep3 = document.getElementById('back-step3');
+    const btnToStep4 = document.getElementById('to-step4');
 
     // Step4 -> extras
     const addExtraBtn = document.getElementById('add-extra-attribute');
@@ -191,9 +189,11 @@ if (btnToStep4) {
     });
 }
 
-    if (btnBackStep3) {
-        btnBackStep3.addEventListener('click', function () { showStep(step3); });
-    }
+if (btnBackStep3) {
+    btnBackStep3.addEventListener('click', function () {
+        showStep(step3);
+    });
+}
 
     // ===== Shops checkbox change delegation (works if container dynamically replaced) =====
     if (shopsContainer) {
