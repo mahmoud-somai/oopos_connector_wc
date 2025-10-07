@@ -85,9 +85,15 @@ function oopos_connector_page() {
 
 
 
-   <!-- Step 3 -->
-<div class="step" id="step3">
+
+<!-- Step 3 -->
+<div class="step" id="step3" style="display:none;">
     <h3>Choose your attributes</h3>
+
+    <?php 
+    $image_url = plugins_url('../attribute_picture.png', __FILE__); 
+    $saved_attributes = get_option('oopos_settings_basic_attribute', []);
+    ?>
 
     <div class="attribute-image-container">
         <img src="<?php echo esc_url($image_url); ?>" 
@@ -106,6 +112,7 @@ function oopos_connector_page() {
     <button type="button" id="back-step2">Previous</button>
     <button type="button" id="to-step4">Next</button>
 </div>
+
 
 
 <!-- Step 4 -->
