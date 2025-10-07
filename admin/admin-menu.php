@@ -164,3 +164,64 @@ function oopos_save_basic_attributes() {
         update_option('oopos_settings_basic_attribute', $attributes);
     }
 }
+
+
+// ✅ AJAX : Save Extra Attributes and Create them in WooCommerce
+add_action('wp_ajax_save_extra_attributes', 'oopos_save_extra_attributes');
+function oopos_save_extra_attributes() {
+    check_ajax_referer('wt_iew_nonce', '_wpnonce');
+
+    if (!isset($_POST['extra_attributes']) || !is_array($_POST['extra_attributes'])) {
+        wp_send_json_error('No attributes received.');
+    }
+
+    $attributes = array_map('sanitize_text_field', $_POST['extra_attributes']);
+
+    // Save in WP option
+    update_option('oopos_settings_extra_attributes', $attributes);
+
+    global $wpdb;
+    $table = $wpdb->prefix . 'woocommerce_attribute_taxonomies';
+
+    foreach ($attributes as $attr_name) {
+        $slug = wc_sanitize_taxonomy_name($attr_name);
+
+        // Check if already exists
+        $exists = $wpdb->get_var($wpdb->prepare(
+            "SELECT attribute_id FROM $table WHERE attribute_name = %s",
+            $slug
+        ));
+
+        if (!$exists) {
+            // Insert attribute into WooCommerce table
+            $wpdb->insert($table, array(
+                'attribute_name'    => $slug,
+                'attribute_label'   => $attr_name,
+                'attribute_type'    => 'select',
+                'attribute_orderby' => 'menu_order',
+                'attribute_public'  => 1,
+            ));
+        }
+
+        // Register the taxonomy (important for immediate recognition)
+        $taxonomy = 'pa_' . $slug;
+        if (!taxonomy_exists($taxonomy)) {
+            register_taxonomy(
+                $taxonomy,
+                array('product'),
+                array(
+                    'label' => ucfirst($attr_name),
+                    'public' => true,
+                    'show_ui' => true,
+                    'hierarchical' => false,
+                )
+            );
+        }
+    }
+
+    // Refresh WooCommerce attributes cache
+    delete_transient('wc_attribute_taxonomies');
+    wc_clear_cached_transients();
+
+    wp_send_json_success('Attributes saved and created successfully!');
+}

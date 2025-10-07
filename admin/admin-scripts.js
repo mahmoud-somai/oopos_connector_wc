@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const step2 = document.getElementById('step2');
     const step3 = document.getElementById('step3');
 
+
     const domainInput = document.getElementById('domain');
     const enseigneInput = document.getElementById('enseigne');
     const apiKeyInput = document.getElementById('api_key');
@@ -13,6 +14,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const nextButton = document.getElementById('to-step2');
     const connectionStatus = document.getElementById('connection-status');
+
+    const step4 = document.getElementById('step4');
+    const toStep4Btn = document.getElementById('to-step4');
+    const backStep3Btn = document.getElementById('back-step3');
+    const addExtraBtn = document.getElementById('add-extra-attribute');
+    const extraAttributesContainer = document.getElementById('extra-attributes-container');
 
     let selected_shops = [];
 
@@ -116,4 +123,42 @@ document.addEventListener('DOMContentLoaded', function() {
         step3.style.display = 'none';
         step2.style.display = 'block';
     });
+
+    if (backStep3Btn) {
+        backStep3Btn.addEventListener('click', () => {
+            step4.style.display = 'none';
+            step3.style.display = 'block';
+        });
+    }
+
+    // ===== Add Extra Attribute Field =====
+    if (addExtraBtn) {
+        addExtraBtn.addEventListener('click', () => {
+            const div = document.createElement('div');
+            div.classList.add('extra-attribute-row');
+            div.style.display = 'flex';
+            div.style.alignItems = 'center';
+            div.style.gap = '10px';
+            div.style.marginBottom = '8px';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'oopos_settings_extra_attributes[]';
+            input.placeholder = 'Extra attribute';
+            input.style.flex = '1';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.textContent = 'Remove';
+            removeBtn.classList.add('button', 'button-secondary');
+
+            removeBtn.addEventListener('click', () => {
+                div.remove();
+            });
+
+            div.appendChild(input);
+            div.appendChild(removeBtn);
+            extraAttributesContainer.appendChild(div);
+        });
+    }
 });

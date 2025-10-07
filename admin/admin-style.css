@@ -131,3 +131,33 @@ form#multi-step-form {
     border: 1px solid #ccc;
     border-radius: 6px;
 }
+.extra-attribute-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.extra-attribute-row input {
+    flex: 1;
+    max-width: 400px;
+    padding: 5px 8px;
+}
+
+.remove-attribute {
+    background: #d63638;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+}
+
+#add-extra-attribute {
+    background: #007cba;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
