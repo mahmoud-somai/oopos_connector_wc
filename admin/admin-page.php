@@ -85,30 +85,39 @@ function oopos_connector_page() {
 
 
 
-                <!-- Step 3 -->
-                <!-- Step 3 -->
-                <div class="step" id="step3">
-                    <h3>Choose your attributes</h3>
+   <!-- Step 3 -->
+<div class="step" id="step3">
+    <h3>Choose your attributes</h3>
 
-                    <?php 
-                    // Display the attribute illustration
-                    $image_url = plugins_url('attribut_picture.png', __FILE__); 
-                    ?>
-                    <div style="margin: 10px 0;">
-                        <img src="<?php echo esc_url($image_url); ?>" 
-                            alt="Attributes Illustration" 
-                            style="max-width: 250px; height: auto; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" />
-                    </div>
+    <?php 
+    // Get image from parent plugin directory (one level up from /admin/)
+    $image_url = plugins_url('../attribut_picture.png', __FILE__); 
 
-                    <label>Size:</label><br>
-                    <input type="text" name="oopos_connector_data[size]" value="<?php echo esc_attr($data['size'] ?? ''); ?>"><br>
+    // Get saved data from the options table
+    $saved_attributes = get_option('oopos_settings_basic_attribute', []);
+    ?>
 
-                    <label>Color:</label><br>
-                    <input type="text" name="oopos_connector_data[color]" value="<?php echo esc_attr($data['color'] ?? ''); ?>"><br>
+    <div style="margin: 10px 0; text-align: center;">
+        <img src="<?php echo esc_url($image_url); ?>" 
+             alt="Attributes Illustration" 
+             style="max-width: 300px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+    </div>
 
-                    <button type="button" id="back-step2">Previous</button>
-                    <?php submit_button('Save Settings'); ?>
-                </div>
+    <form method="post" action="">
+        <?php wp_nonce_field('save_oopos_attributes', 'oopos_attributes_nonce'); ?>
+
+        <label for="size">Size:</label><br>
+        <input type="text" id="size" name="oopos_settings_basic_attribute[size]" 
+               value="<?php echo esc_attr($saved_attributes['size'] ?? ''); ?>"><br><br>
+
+        <label for="color">Color:</label><br>
+        <input type="text" id="color" name="oopos_settings_basic_attribute[color]" 
+               value="<?php echo esc_attr($saved_attributes['color'] ?? ''); ?>"><br><br>
+
+        <button type="button" id="back-step2">Previous</button>
+        <?php submit_button('Save Settings'); ?>
+    </form>
+</div>
 
 
             </form>

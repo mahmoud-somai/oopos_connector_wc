@@ -147,3 +147,20 @@ function save_selected_shops_option_callback() {
         wp_send_json_error('No shops received.');
     }
 }
+
+// ✅ Save Size and Color attributes (Step 3)
+add_action('admin_init', 'oopos_save_basic_attributes');
+function oopos_save_basic_attributes() {
+    if (
+        isset($_POST['oopos_settings_basic_attribute']) &&
+        isset($_POST['oopos_attributes_nonce']) &&
+        wp_verify_nonce($_POST['oopos_attributes_nonce'], 'save_oopos_attributes')
+    ) {
+        $attributes = [
+            'size'  => sanitize_text_field($_POST['oopos_settings_basic_attribute']['size']),
+            'color' => sanitize_text_field($_POST['oopos_settings_basic_attribute']['color']),
+        ];
+
+        update_option('oopos_settings_basic_attribute', $attributes);
+    }
+}
