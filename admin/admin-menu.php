@@ -151,58 +151,39 @@ function save_selected_shops_option_callback() {
 // Save Step 3 attributes
 add_action('wp_ajax_oopos_save_attributes', 'oopos_save_attributes');
 function oopos_save_attributes() {
-    // Security check
-    check_ajax_referer('oopos_connector_nonce', '_wpnonce');
+    check_ajax_referer('wt_iew_nonce', '_wpnonce');
 
-    $size  = sanitize_text_field($_POST['size'] ?? '');
+    $size = sanitize_text_field($_POST['size'] ?? '');
     $color = sanitize_text_field($_POST['color'] ?? '');
 
-    $saved_attributes = get_option('oopos_settings_basic_attribute', []);
-    $saved_attributes['size']  = $size;
-    $saved_attributes['color'] = $color;
+    update_option('oopos_settings_basic_attribute', [
+        'size' => $size,
+        'color' => $color,
+    ]);
 
-    update_option('oopos_settings_basic_attribute', $saved_attributes);
+    // Save WooCommerce attributes if new
+    $attribute_taxonomies = wc_get_attribute_taxonomies();
 
-    // Add as WooCommerce product attributes if not exist
-    if (class_exists('WC_Product_Attribute')) {
-        global $wpdb;
-
-        $attributes = wc_get_attribute_taxonomies();
-
-        foreach (['size' => $size, 'color' => $color] as $name => $value) {
-            if ($value) {
-                $exists = false;
-                foreach ($attributes as $attr) {
-                    if (strtolower($attr->attribute_name) === strtolower($name)) {
-                        $exists = true;
-                        break;
-                    }
-                }
-
-                if (!$exists) {
-                    // create WooCommerce attribute
-                    $attribute_id = wc_create_attribute([
-                        'name'         => ucfirst($name),
-                        'slug'         => sanitize_title($name),
-                        'type'         => 'select',
-                        'order_by'     => 'menu_order',
-                        'has_archives' => false,
-                    ]);
-
-                    if ($attribute_id && taxonomy_exists('pa_' . sanitize_title($name))) {
-                        $term = wp_insert_term($value, 'pa_' . sanitize_title($name));
-                    }
-                } else {
-                    // Attribute exists, optionally add term
-                    $taxonomy = 'pa_' . sanitize_title($name);
-                    if (!term_exists($value, $taxonomy)) {
-                        wp_insert_term($value, $taxonomy);
-                    }
-                }
-            }
-        }
+    if ($size && !in_array('size', array_column($attribute_taxonomies, 'attribute_name'))) {
+        wc_create_attribute([
+            'name' => 'Size',
+            'slug' => 'size',
+            'type' => 'select',
+            'order_by' => 'menu_order',
+            'has_archives' => false
+        ]);
+    }
+    if ($color && !in_array('color', array_column($attribute_taxonomies, 'attribute_name'))) {
+        wc_create_attribute([
+            'name' => 'Color',
+            'slug' => 'color',
+            'type' => 'select',
+            'order_by' => 'menu_order',
+            'has_archives' => false
+        ]);
     }
 
-    wp_send_json_success(['message' => 'Attributes saved']);
+    wp_send_json_success(['message' => 'Attributes saved successfully']);
 }
+
 
