@@ -186,34 +186,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ===== Step 3 -> Step 4 (save basic attrs via AJAX then show step4) =====
 if (btnToStep4) {
-btnToStep4.addEventListener('click', function () {
-    const sizeVal = document.getElementById('size')?.value.trim() || '';
-    const colorVal = document.getElementById('color')?.value.trim() || '';
-
-    if (!sizeVal && !colorVal) {
-        alert('Please fill at least one attribute (size or color)');
-        return;
-    }
-
-    // Save via AJAX
-    $.post(wt_iew_ajax.ajax_url, {
-        action: 'save_basic_attributes',
-        size: sizeVal,
-        color: colorVal,
-        _wpnonce: wt_iew_ajax.nonce
-    }, function (resp) {
-        if (resp && resp.success) {
-            showStep(step4); // ✅ Only runs if AJAX returns success
-        } else {
-            alert('Error saving attributes. See console.');
-        }
-    }).fail(function () {
-        alert('AJAX error saving basic attributes');
+    btnToStep4.addEventListener('click', function () {
+        showStep(step4);
     });
-});
-
 }
-
 
     if (btnBackStep3) {
         btnBackStep3.addEventListener('click', function () { showStep(step3); });

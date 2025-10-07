@@ -115,39 +115,9 @@ function oopos_connector_page() {
 
 
 
-<!-- Step 4 -->
+<!--step 4 -->
 <div class="step" id="step4" style="display:none;">
-    <h3>Add Additional Attributes</h3>
-
-    <?php 
-    $extra_attributes = get_option('oopos_settings_extra_attributes', []);
-    wp_nonce_field('save_oopos_extra_attributes', 'oopos_extra_attributes_nonce');
-    ?>
-
-    <div id="extra-attributes-container">
-        <?php if (!empty($extra_attributes)) : ?>
-            <?php foreach ($extra_attributes as $attr) : ?>
-                <div class="extra-attribute-row" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                    <label>Extra attribute:</label>
-                    <input type="text" name="oopos_settings_extra_attributes[]" 
-                           value="<?php echo esc_attr($attr); ?>" />
-                    <button type="button" class="button button-secondary remove-attribute">Remove</button>
-                </div>
-            <?php endforeach; ?>
-        <?php else : ?>
-            <div class="extra-attribute-row" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                <label>Extra attribute:</label>
-                <input type="text" name="oopos_settings_extra_attributes[]" value="" />
-                <button type="button" class="button button-secondary remove-attribute">Remove</button>
-            </div>
-        <?php endif; ?>
-    </div>
-
-    <button type="button" id="add-extra-attribute" class="button button-primary">Add Another Attribute</button><br><br>
-
-    <button type="button" id="back-step3" class="button">Previous</button>
-    <?php submit_button('Save Extra Attributes'); ?>
-    
+    <h3>Additional Settings</h3>
 </div>
 
             </form>
