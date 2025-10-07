@@ -119,6 +119,7 @@ function oopos_connector_page() {
 <!--step 4 -->
 <div class="step" id="step4" style="display:none;">
     <h3>Additional Settings</h3>
+    <button type="button" id="back-step4">Previous</button>
 </div>
 
             </form>

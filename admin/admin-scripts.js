@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnBackStep3 = document.getElementById('back-step3');
     const btnToStep4 = document.getElementById('to-step4');
 
+    const btnBackStep4 = document.getElementById('back-step4');
+
     // ===== Step 4 Extras =====
     const addExtraBtn = document.getElementById('add-extra-attribute');
     const extrasContainer = document.getElementById('extra-attributes-container');
@@ -148,37 +150,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (btnBackStep2) btnBackStep2.addEventListener('click', function () { showStep(step2); });
 
-    // ===== Step 3 → Step 4 =====
-    if (btnToStep4) {
-        btnToStep4.addEventListener('click', function () {
-            const sizeVal = inputSize?.value.trim() || '';
-            const colorVal = inputColor?.value.trim() || '';
+    
 
-            if (!sizeVal && !colorVal) {
-                alert('Please enter at least one attribute');
-                return;
+
+// Step 3 → Step 4
+if (btnToStep4) {
+    btnToStep4.addEventListener('click', function () {
+        const sizeLabel = inputSize?.value.trim() || '';
+        const colorLabel = inputColor?.value.trim() || '';
+
+        if (!sizeLabel && !colorLabel) {
+            alert('Please enter at least one attribute');
+            return;
+        }
+
+        jQuery.post(wt_iew_ajax.ajax_url, {
+            action: 'oopos_save_attributes',
+            sizeLabel: sizeLabel,
+            colorLabel: colorLabel,
+            _wpnonce: wt_iew_ajax.nonce
+        }, function (response) {
+            if (response.success) {
+                console.log(response.data.message || 'Attributes saved');
+                showStep(step4);
+            } else {
+                alert(response.data?.message || 'Error saving attributes');
             }
-
-            jQuery.post(wt_iew_ajax.ajax_url, {
-                action: 'oopos_save_attributes',
-                size: sizeVal,
-                color: colorVal,
-                _wpnonce: wt_iew_ajax.nonce
-            }, function (response) {
-                if (response.success) {
-                    console.log(response.data.message || 'Attributes saved');
-                    showStep(step4);
-                } else {
-                    alert(response.data?.message || 'Error saving attributes');
-                }
-            }).fail(function (err) {
-                console.error('AJAX error saving attributes:', err);
-                alert('AJAX error, check console');
-            });
+        }).fail(function (err) {
+            console.error('AJAX error saving attributes:', err);
+            alert('AJAX error, check console');
         });
-    }
+    });
+}
+
 
     if (btnBackStep3) btnBackStep3.addEventListener('click', function () { showStep(step3); });
+    if (btnBackStep4) btnBackStep4.addEventListener('click', function () { showStep(step3); });
 
     // ===== Shops change handler =====
     if (shopsContainer) {
