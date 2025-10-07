@@ -97,10 +97,16 @@ function oopos_connector_page() {
     $saved_attributes = get_option('oopos_settings_basic_attribute', []);
     ?>
 
-    <div style="margin: 10px 0; text-align: center;">
+    <div style="margin: 20px 0; text-align: center;">
         <img src="<?php echo esc_url($image_url); ?>" 
              alt="Attributes Illustration" 
-             style="max-width: 300px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />
+             style="
+                 max-width: 600px; 
+                 width: 100%; 
+                 height: auto; 
+                 border-radius: 10px; 
+                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+             " />
     </div>
 
     <form method="post" action="">
