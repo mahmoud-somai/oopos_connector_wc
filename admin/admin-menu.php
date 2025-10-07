@@ -214,7 +214,6 @@ function oopos_save_attributes() {
 
     wp_send_json_success(['message' => 'Attributes saved successfully']);
 }
-*
 
 add_action('wp_ajax_oopos_save_extra_attributes', 'oopos_save_extra_attributes');
 function oopos_save_extra_attributes() {
@@ -260,6 +259,8 @@ function oopos_save_extra_attributes() {
 
     wp_send_json_success(['message' => 'Extra attributes saved successfully']);
 }
+
+
 
 
 
