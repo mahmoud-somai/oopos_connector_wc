@@ -156,45 +156,47 @@ function oopos_save_attributes() {
     $sizeLabel  = sanitize_text_field($_POST['sizeLabel'] ?? '');
     $colorLabel = sanitize_text_field($_POST['colorLabel'] ?? '');
 
-    // Save in options (always "size" and "color")
+    // 1️⃣ Save in options (always "size" and "color" keys)
     update_option('oopos_settings_basic_attribute', [
-        'size'  => $sizeLabel,
+        'size'  => $sizeLabel,   // store user input
         'color' => $colorLabel,
     ]);
 
-    // Save or update WooCommerce attributes
+    // 2️⃣ Save or update WooCommerce attributes
     if (function_exists('wc_create_attribute')) {
+        global $wpdb;
+
         $attribute_taxonomies = wc_get_attribute_taxonomies();
         $existing_names = array_column($attribute_taxonomies, 'attribute_name');
 
-        global $wpdb;
-
-        // Size
+        // Size attribute
         if ($sizeLabel) {
-            if (!in_array('size', $existing_names)) {
+            if (!in_array($sizeLabel, $existing_names)) {
+                // create attribute with slug = label
                 wc_create_attribute([
                     'name' => $sizeLabel,
-                    'slug' => 'size',
+                    'slug' => sanitize_title($sizeLabel),
                     'type' => 'select',
                     'order_by' => 'menu_order',
                     'has_archives' => false
                 ]);
             } else {
+                // update existing attribute label
                 $wpdb->update(
                     $wpdb->prefix . 'woocommerce_attribute_taxonomies',
-                    ['attribute_label' => $sizeLabel],
-                    ['attribute_name' => 'size']
+                    ['attribute_label' => $sizeLabel, 'attribute_name' => sanitize_title($sizeLabel)],
+                    ['attribute_name' => sanitize_title($sizeLabel)]
                 );
                 wc_clear_attribute_cache();
             }
         }
 
-        // Color
+        // Color attribute
         if ($colorLabel) {
-            if (!in_array('color', $existing_names)) {
+            if (!in_array($colorLabel, $existing_names)) {
                 wc_create_attribute([
                     'name' => $colorLabel,
-                    'slug' => 'color',
+                    'slug' => sanitize_title($colorLabel),
                     'type' => 'select',
                     'order_by' => 'menu_order',
                     'has_archives' => false
@@ -202,8 +204,8 @@ function oopos_save_attributes() {
             } else {
                 $wpdb->update(
                     $wpdb->prefix . 'woocommerce_attribute_taxonomies',
-                    ['attribute_label' => $colorLabel],
-                    ['attribute_name' => 'color']
+                    ['attribute_label' => $colorLabel, 'attribute_name' => sanitize_title($colorLabel)],
+                    ['attribute_name' => sanitize_title($colorLabel)]
                 );
                 wc_clear_attribute_cache();
             }
