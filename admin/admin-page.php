@@ -118,8 +118,17 @@ function oopos_connector_page() {
 
 <!--step 4 -->
 <div class="step" id="step4" style="display:none;">
-    <h3>Additional Settings</h3>
-    <button type="button" id="back-step4">Previous</button>
+    <h3>Additional Attribute Settings</h3>
+
+    <div id="extra-attributes-container"></div>
+
+    <button type="button" id="add-extra-attribute" class="button button-secondary">Add Another Attribute</button>
+
+    <div style="margin-top:20px;">
+        <button type="button" id="back-step4" class="button">Previous</button>
+        <button type="button" id="save-extra-attributes" class="button button-primary">Add Attributes</button>
+        <button type="button" id="skip-extra-attributes" class="button button-secondary">Skip</button>
+    </div>
 </div>
 
             </form>
