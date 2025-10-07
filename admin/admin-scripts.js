@@ -286,6 +286,13 @@ if (backStep4Btn) {
         showStep(step3); // assuming step3 exists
     });
 }
-    showStep(step1 || stepEls[0] || null);
+    function showStep(stepEl) {
+        stepEls.forEach(el => el.style.display = 'none');
+        stepEl.style.display = 'block';
+    }
+
+    // Initialize to step 1
+    showStep(step1);
+    
 
 });
