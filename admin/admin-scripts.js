@@ -191,7 +191,7 @@ if (btnToStep4) {
 
 if (btnBackStep3) {
     btnBackStep3.addEventListener('click', function () {
-        showStep(step3);
+        showStep(step2);
     });
 }
 
