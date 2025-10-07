@@ -89,35 +89,22 @@ function oopos_connector_page() {
 <div class="step" id="step3">
     <h3>Choose your attributes</h3>
 
-    <?php 
-    // Get image from parent plugin directory (one level up from /admin/)
-    $image_url = plugins_url('../attribute_picture.png', __FILE__); 
-
-    // Get saved data from the options table
-    $saved_attributes = get_option('oopos_settings_basic_attribute', []);
-    ?>
-
     <div class="attribute-image-container">
         <img src="<?php echo esc_url($image_url); ?>" 
              alt="Attributes Illustration" 
              class="attribute-image" />
     </div>
 
-    <form method="post" action="">
-        <?php wp_nonce_field('save_oopos_attributes', 'oopos_attributes_nonce'); ?>
+    <label for="size">Size:</label><br>
+    <input type="text" id="size" name="oopos_settings_basic_attribute[size]" 
+           value="<?php echo esc_attr($saved_attributes['size'] ?? ''); ?>"><br><br>
 
-        <label for="size">Size:</label><br>
-        <input type="text" id="size" name="oopos_settings_basic_attribute[size]" 
-               value="<?php echo esc_attr($saved_attributes['size'] ?? ''); ?>"><br><br>
+    <label for="color">Color:</label><br>
+    <input type="text" id="color" name="oopos_settings_basic_attribute[color]" 
+           value="<?php echo esc_attr($saved_attributes['color'] ?? ''); ?>"><br><br>
 
-        <label for="color">Color:</label><br>
-        <input type="text" id="color" name="oopos_settings_basic_attribute[color]" 
-               value="<?php echo esc_attr($saved_attributes['color'] ?? ''); ?>"><br><br>
-
-        <button type="button" id="back-step2">Previous</button>
-        <button type="button" id="to-step4">Next</button>
-        
-    </form>
+    <button type="button" id="back-step2">Previous</button>
+    <button type="button" id="to-step4">Next</button>
 </div>
 
 
