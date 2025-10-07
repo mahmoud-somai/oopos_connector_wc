@@ -76,7 +76,7 @@ function oopos_connector_page() {
             <?php endforeach; ?>
         </div>
     <?php else : ?>
-        <p style="color:red;">⚠️ No shops found. Please test the connection first.</p>
+        <p style="color:red;"> No shops found. Please test the connection first.</p>
     <?php endif; ?>
 
     <button type="button" id="back-step1">Previous</button>
@@ -86,8 +86,20 @@ function oopos_connector_page() {
 
 
                 <!-- Step 3 -->
+                <!-- Step 3 -->
                 <div class="step" id="step3">
                     <h3>Choose your attributes</h3>
+
+                    <?php 
+                    // Display the attribute illustration
+                    $image_url = plugins_url('attribut_picture.png', __FILE__); 
+                    ?>
+                    <div style="margin: 10px 0;">
+                        <img src="<?php echo esc_url($image_url); ?>" 
+                            alt="Attributes Illustration" 
+                            style="max-width: 250px; height: auto; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" />
+                    </div>
+
                     <label>Size:</label><br>
                     <input type="text" name="oopos_connector_data[size]" value="<?php echo esc_attr($data['size'] ?? ''); ?>"><br>
 
@@ -97,6 +109,7 @@ function oopos_connector_page() {
                     <button type="button" id="back-step2">Previous</button>
                     <?php submit_button('Save Settings'); ?>
                 </div>
+
 
             </form>
         </div>
