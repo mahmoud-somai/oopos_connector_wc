@@ -1,13 +1,14 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ===== Step Elements =====
+
+    // Steps
     const stepEls = Array.from(document.querySelectorAll('.step'));
     const step1 = document.getElementById('step1');
     const step2 = document.getElementById('step2');
     const step3 = document.getElementById('step3');
     const step4 = document.getElementById('step4');
 
-    // ===== Step 1 Elements =====
+    // Step1 elements
     const domainInput = document.getElementById('domain');
     const enseigneInput = document.getElementById('enseigne');
     const apiKeyInput = document.getElementById('api_key');
@@ -20,35 +21,41 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnToStep2 = document.getElementById('to-step2');
     const connectionStatus = document.getElementById('connection-status');
 
-    // ===== Step 2 Elements =====
+    // Step2 -> shops
     const shopsContainer = document.getElementById('shops-container');
+
+    // Step3 -> attributes
     const btnToStep3 = document.getElementById('to-step3');
     const btnBackStep2 = document.getElementById('back-step2');
 
-    // ===== Step 3 Elements =====
-    const btnToStep4 = document.getElementById('to-step4');
+    // Step3 -> Step4
     const btnBackStep3 = document.getElementById('back-step3');
+    const btnToStep4 = document.getElementById('to-step4');
 
-    // ===== Step 4 Elements =====
+    // Step4 -> extras
     const addExtraBtn = document.getElementById('add-extra-attribute');
     const extrasContainer = document.getElementById('extra-attributes-container');
 
-    // ===== State =====
+    // State
     let selected_shops = [];
 
-    // ===== Helper: Show Step =====
+    // Helper: show a specific step (hide others)
     function showStep(el) {
         stepEls.forEach(s => {
             if (!s) return;
             s.style.display = (s === el) ? 'block' : 'none';
         });
+        // scroll to top for user clarity
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ===== Helper: Update Selected Shops =====
+    // Helper: collect selected shops (safe if shopsContainer missing)
     function updateSelectedShops() {
         selected_shops = [];
-        if (!shopsContainer) return;
+        if (!shopsContainer) {
+            console.debug('No shops container found.');
+            return;
+        }
         shopsContainer.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
             selected_shops.push(cb.value);
         });
@@ -102,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ===== Step 1 → Step 2 =====
+    // ===== Step 1 -> Step 2 (save step1 via AJAX) =====
     if (btnToStep2) {
         btnToStep2.addEventListener('click', function () {
             showStep(step2);
@@ -117,13 +124,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 enseigne: enseigneVal,
                 api_key: apiKeyVal,
                 _wpnonce: wt_iew_ajax.nonce
+            }, function (resp) {
+                console.debug('Step1 saved:', resp);
+                // Optionally refresh shops list via ajax endpoint oopos_get_shops
+                // fetch shops from server and repopulate shopsContainer if needed
+                if (shopsContainer) {
+                    // attempt to refresh shops visually (non-blocking)
+                    $.post(wt_iew_ajax.ajax_url, {
+                        action: 'oopos_get_shops',
+                        _wpnonce: wt_iew_ajax.nonce
+                    }, function (r) {
+                        if (r && r.success && Array.isArray(r.data)) {
+                            // rebuild checkboxes
+                            let html = '';
+                            r.data.forEach((shop, idx) => {
+                                const checked = (document.querySelector(`input[name="oopos_connector_data[shop_selected][]"][value="${shop}"]`)?.checked) ? ' checked' : '';
+                                const mainAttr = (idx === 0) ? ' data-main="true"' : '';
+                                html += `<label class="shop-checkbox"><input type="checkbox" name="oopos_connector_data[shop_selected][]" value="${escapeHtml(shop)}"${checked}${mainAttr}> ${escapeHtml(shop)}${idx===0 ? ' (Main)' : ''}</label>`;
+                            });
+                            shopsContainer.innerHTML = html;
+                        }
+                        // attach change handler by delegation below, and set selected_shops
+                        updateSelectedShops();
+                    }).fail(function () {
+                        updateSelectedShops();
+                    });
+                }
             });
         });
     }
 
-    // ===== Step 2 → Step 3 =====
+    // ===== step nav btns =====
+    const backStep1 = document.getElementById('back-step1');
+    if (backStep1) {
+        backStep1.addEventListener('click', function () { showStep(step1); });
+    }
+
     if (btnToStep3) {
         btnToStep3.addEventListener('click', function () {
+            // update selected shops then save option via AJAX
             updateSelectedShops();
             showStep(step3);
 
@@ -131,40 +170,41 @@ document.addEventListener('DOMContentLoaded', function () {
                 action: 'save_selected_shops_option',
                 selected_shops: selected_shops,
                 _wpnonce: wt_iew_ajax.nonce
+            }, function (resp) {
+                console.debug('Save selected shops response:', resp);
+            }).fail(function (err) {
+                console.error('Failed saving selected shops', err);
             });
         });
     }
 
-    // ===== Back Buttons =====
-    if (btnBackStep2) btnBackStep2.addEventListener('click', function () { showStep(step1); });
-    if (btnBackStep3) btnBackStep3.addEventListener('click', function () { showStep(step2); });
-
-    // ===== Step 3 → Step 4 =====
-    if (btnToStep4) {
-        btnToStep4.addEventListener('click', function () {
-            showStep(step4);
-
-            // Optionally save attributes via AJAX
-            const size = document.getElementById('size')?.value || '';
-            const color = document.getElementById('color')?.value || '';
-
-            $.post(wt_iew_ajax.ajax_url, {
-                action: 'save_basic_attributes',
-                size: size,
-                color: color,
-                _wpnonce: wt_iew_ajax.nonce
-            });
-        });
+    if (btnBackStep2) {
+        btnBackStep2.addEventListener('click', function () { showStep(step2); });
     }
 
-    // ===== Shops checkbox change =====
+    // ===== Step 3 -> Step 4 (save basic attrs via AJAX then show step4) =====
+if (btnToStep4) {
+    btnToStep4.addEventListener('click', function () {
+        showStep(step4);
+    });
+}
+
+if (btnBackStep3) {
+    btnBackStep3.addEventListener('click', function () {
+        showStep(step3);
+    });
+}
+
+    // ===== Shops checkbox change delegation (works if container dynamically replaced) =====
     if (shopsContainer) {
         shopsContainer.addEventListener('change', function (e) {
-            if (e.target && e.target.matches('input[type="checkbox"]')) updateSelectedShops();
+            if (e.target && e.target.matches('input[type="checkbox"]')) {
+                updateSelectedShops();
+            }
         });
     }
 
-    // ===== Extras: add/remove attribute rows =====
+    // ===== Extras: add/remove attribute inputs =====
     function createExtraRow(value = '') {
         const row = document.createElement('div');
         row.className = 'extra-attribute-row';
@@ -188,7 +228,9 @@ document.addEventListener('DOMContentLoaded', function () {
         removeBtn.type = 'button';
         removeBtn.className = 'button button-secondary remove-attribute';
         removeBtn.textContent = 'Remove';
-        removeBtn.addEventListener('click', function () { row.remove(); });
+        removeBtn.addEventListener('click', function () {
+            row.remove();
+        });
 
         row.appendChild(label);
         row.appendChild(input);
@@ -197,15 +239,30 @@ document.addEventListener('DOMContentLoaded', function () {
         return row;
     }
 
+    // initialize existing remove buttons (in case HTML already had them)
+    function initExistingRemoves() {
+        // delegate if no container
+        if (!extrasContainer) return;
+        extrasContainer.querySelectorAll('.remove-attribute').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                const parent = e.target.closest('.extra-attribute-row');
+                if (parent) parent.remove();
+            });
+        });
+    }
+
     if (addExtraBtn && extrasContainer) {
         addExtraBtn.addEventListener('click', function () {
             const row = createExtraRow('');
             extrasContainer.appendChild(row);
+            // focus newly created input
             row.querySelector('input[name="oopos_settings_extra_attributes[]"]')?.focus();
         });
     }
 
-    // ===== Utility: escape HTML =====
+    initExistingRemoves();
+
+    // ===== Utility: simple escape for building HTML strings (used above optionally) =====
     function escapeHtml(str) {
         if (typeof str !== 'string') return str;
         return str.replace(/[&<>"'`=\/]/g, function (s) {
@@ -222,10 +279,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ===== Show initial step =====
+    // show initial step (ensure step1 visible)
     showStep(step1 || stepEls[0] || null);
 
-    // ===== Debug missing elements =====
+    // debug: log missing elements only once
     (function debugMissing() {
         const missing = [];
         if (!domainInput) missing.push('#domain');
@@ -235,8 +292,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!btnToStep2) missing.push('#to-step2');
         if (!btnToStep3) missing.push('#to-step3');
         if (!btnToStep4) missing.push('#to-step4');
-        if (!btnBackStep3) missing.push('#back-step3');
-        if (missing.length) console.debug('OOPOS admin: missing elements:', missing);
+        if (missing.length) console.debug('OOPOS admin: missing elements (OK if not on this page):', missing);
     })();
-
 });
