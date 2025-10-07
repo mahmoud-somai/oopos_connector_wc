@@ -91,7 +91,7 @@ function oopos_connector_page() {
 
     <?php 
     // Get image from parent plugin directory (one level up from /admin/)
-    $image_url = plugins_url('../attribut_picture.png', __FILE__); 
+    $image_url = plugins_url('../attribute_picture.png', __FILE__); 
 
     // Get saved data from the options table
     $saved_attributes = get_option('oopos_settings_basic_attribute', []);
