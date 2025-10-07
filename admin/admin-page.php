@@ -97,16 +97,10 @@ function oopos_connector_page() {
     $saved_attributes = get_option('oopos_settings_basic_attribute', []);
     ?>
 
-    <div style="margin: 20px 0; text-align: center;">
+    <div class="attribute-image-container">
         <img src="<?php echo esc_url($image_url); ?>" 
              alt="Attributes Illustration" 
-             style="
-                 max-width: 600px; 
-                 width: 100%; 
-                 height: auto; 
-                 border-radius: 10px; 
-                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-             " />
+             class="attribute-image" />
     </div>
 
     <form method="post" action="">
@@ -124,7 +118,6 @@ function oopos_connector_page() {
         <?php submit_button('Save Settings'); ?>
     </form>
 </div>
-
 
             </form>
         </div>

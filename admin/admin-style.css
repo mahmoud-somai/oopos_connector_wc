@@ -97,3 +97,37 @@ form#multi-step-form {
     margin-bottom: 10px;
     display: block;
 }
+/* Attribute section styling */
+.attribute-image-container {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.attribute-image {
+    max-width: 900px;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.attribute-image:hover {
+    transform: scale(1.03);
+}
+
+/* Optional: form label and inputs styling */
+#step3 label {
+    font-weight: 600;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+#step3 input[type="text"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
