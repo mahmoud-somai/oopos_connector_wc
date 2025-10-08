@@ -1,5 +1,5 @@
 <?php
-function oopos_connector_page() {
+function oopos_connector_settings_page() {
         $data = get_option('oopos_connector_data', array());
     $shops_data = get_option('oopos_shops', array());
 
