@@ -131,6 +131,19 @@ function oopos_connector_page() {
     </div>
 </div>
 
+<!-- Step 5 -->
+<div class="step" id="step5" style="display:none;">
+    <h3>Review and Confirm</h3>
+    <form id="review-form">
+        <div id="review-content"></div>
+        <button type="button" id="back-step5" class="button">Previous</button>
+        <button type="submit" class="button button-primary">Save Settings</button>
+
+    </form>
+</div>
+
+ 
+
             </form>
         </div>
     </div>
