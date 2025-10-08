@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const backStep4Btn = document.getElementById('back-step4');
 
     const step5 = document.getElementById('step5');
+    const btnSkipExtra = document.getElementById('skip-extra-attributes');
     const btnBackStep5 = document.getElementById('back-step5');
 
     function updateSelectedShops() {
@@ -286,6 +287,20 @@ if (backStep4Btn) {
     function showStep(stepEl) {
         stepEls.forEach(el => el.style.display = 'none');
         stepEl.style.display = 'block';
+
+        
+    // 👉 Skip button from Step 4 → Step 5
+    if (btnSkipExtra) {
+            btnSkipExtra.addEventListener('click', function() {
+                showStep(step5);
+            });
+        }
+    // 👉 Back button from Step 5 → Step 4
+    if (btnBackStep5) {
+        btnBackStep5.addEventListener('click', function() {
+            showStep(step4);
+        });
+    }
     }
  function showStep(stepToShow) {
         // Hide all steps
@@ -299,23 +314,6 @@ if (backStep4Btn) {
     }
 
 
-
-
-
-
-    // 👉 Skip button from Step 4 → Step 5
-    if (skipExtraBtn) {
-        skipExtraBtn.addEventListener('click', function() {
-            showStep(step5);
-        });
-    }
-
-    // 👉 Back button from Step 5 → Step 4
-    if (btnBackStep5) {
-        btnBackStep5.addEventListener('click', function() {
-            showStep(step4);
-        });
-    }
     // Initialize to step 1
     showStep(step1);
 
