@@ -284,24 +284,20 @@ if (backStep4Btn) {
         showStep(step3); // assuming step3 exists
     });
 }
-    function showStep(stepEl) {
-        stepEls.forEach(el => el.style.display = 'none');
-        stepEl.style.display = 'block';
+if (skipExtraBtn) {
+    skipExtraBtn.addEventListener('click', function() {
+        console.log('Skip clicked → Step 5');
+        showStep(step5);
+    });
+}
 
-        
-    // 👉 Skip button from Step 4 → Step 5
-    if (skipExtraBtn) {
-            skipExtraBtn.addEventListener('click', function() {
-                showStep(step5);
-            });
-        }
-    // 👉 Back button from Step 5 → Step 4
-    if (btnBackStep5) {
-        btnBackStep5.addEventListener('click', function() {
-            showStep(step4);
-        });
-    }
-    }
+// ✅ Step 5 → Step 4 (Back)
+if (btnBackStep5) {
+    btnBackStep5.addEventListener('click', function() {
+        console.log('Back clicked → Step 4');
+        showStep(step4);
+    });
+}
  function showStep(stepToShow) {
         // Hide all steps
         document.querySelectorAll('.step').forEach(step => {
