@@ -179,7 +179,9 @@ function oopos_save_attributes() {
                     ['attribute_label' => $label],
                     ['attribute_name' => $slug]
                 );
-                wc_clear_attribute_cache();
+                if (function_exists('delete_transient')) {
+                    delete_transient('wc_attribute_taxonomies');
+                }
                 return "Updated existing attribute: {$label}";
             } else {
                 // Create new one
@@ -195,7 +197,7 @@ function oopos_save_attributes() {
                     return "Error creating attribute {$label}: " . $result->get_error_message();
                 }
 
-                wc_clear_attribute_cache();
+              delete_transient('wc_attribute_taxonomies');
                 return "Created new attribute: {$label}";
             }
         };
