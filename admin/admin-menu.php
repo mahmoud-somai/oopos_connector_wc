@@ -36,7 +36,7 @@ function oopos_connector_menu() {
 
 // Settings page callback
 function oopos_connector_settings_page() {
-    require_once plugin_dir_path(__FILE__) . 'admin-page.php';
+    require_once plugin_dir_path(__FILE__) . 'admin/admin-menu.php';
 }
 
 
