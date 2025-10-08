@@ -38,11 +38,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const extrasContainer = document.getElementById('extra-attributes-container');
     const addExtraBtn = document.getElementById('add-extra-attribute');
     const saveExtraBtn = document.getElementById('save-extra-attributes');
-    const skipExtraBtn = document.getElementById('skip-extra-attributes');
+   
     const backStep4Btn = document.getElementById('back-step4');
 
     const step5 = document.getElementById('step5');
-    const btnSkipExtra = document.getElementById('skip-extra-attributes');
+    const skipExtraBtn = document.getElementById('skip-extra-attributes');
     const btnBackStep5 = document.getElementById('back-step5');
 
     function updateSelectedShops() {
@@ -290,8 +290,8 @@ if (backStep4Btn) {
 
         
     // 👉 Skip button from Step 4 → Step 5
-    if (btnSkipExtra) {
-            btnSkipExtra.addEventListener('click', function() {
+    if (skipExtraBtn) {
+            skipExtraBtn.addEventListener('click', function() {
                 showStep(step5);
             });
         }
