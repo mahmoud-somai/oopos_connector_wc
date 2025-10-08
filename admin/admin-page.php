@@ -1,6 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit; // Security check
-
+echo '<p>Admin page loaded successfully</p>'; 
 if (!function_exists('oopos_connector_settings_page')) {
 
     function oopos_connector_settings_page() {
