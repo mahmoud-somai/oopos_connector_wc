@@ -158,62 +158,56 @@ function oopos_save_attributes() {
 
     // 1️⃣ Save in options (always "size" and "color" keys)
     update_option('oopos_settings_basic_attribute', [
-        'size'  => $sizeLabel,   // store user input
+        'size'  => $sizeLabel,
         'color' => $colorLabel,
     ]);
 
-    // 2️⃣ Save or update WooCommerce attributes
+    // 2️⃣ Create/update WooCommerce attributes
     if (function_exists('wc_create_attribute')) {
         global $wpdb;
 
         $attribute_taxonomies = wc_get_attribute_taxonomies();
-        $existing_names = array_column($attribute_taxonomies, 'attribute_name');
+        $existing_slugs = array_column($attribute_taxonomies, 'attribute_name');
 
-        // Size attribute
-        if ($sizeLabel) {
-            if (!in_array($sizeLabel, $existing_names)) {
-                // create attribute with slug = label
-                wc_create_attribute([
-                    'name' => $sizeLabel,
-                    'slug' => sanitize_title($sizeLabel),
+        // Helper function to safely create/update
+        $save_attribute = function($label) use ($existing_slugs, $wpdb) {
+            $slug = sanitize_title($label);
+            if (in_array($slug, $existing_slugs)) {
+                // Attribute already exists -> update label if needed
+                $wpdb->update(
+                    $wpdb->prefix . 'woocommerce_attribute_taxonomies',
+                    ['attribute_label' => $label],
+                    ['attribute_name' => $slug]
+                );
+                wc_clear_attribute_cache();
+                return "Updated existing attribute: {$label}";
+            } else {
+                // Create new one
+                $result = wc_create_attribute([
+                    'name' => $label,
+                    'slug' => $slug,
                     'type' => 'select',
                     'order_by' => 'menu_order',
                     'has_archives' => false
                 ]);
-            } else {
-                // update existing attribute label
-                $wpdb->update(
-                    $wpdb->prefix . 'woocommerce_attribute_taxonomies',
-                    ['attribute_label' => $sizeLabel, 'attribute_name' => sanitize_title($sizeLabel)],
-                    ['attribute_name' => sanitize_title($sizeLabel)]
-                );
-                wc_clear_attribute_cache();
-            }
-        }
 
-        // Color attribute
-        if ($colorLabel) {
-            if (!in_array($colorLabel, $existing_names)) {
-                wc_create_attribute([
-                    'name' => $colorLabel,
-                    'slug' => sanitize_title($colorLabel),
-                    'type' => 'select',
-                    'order_by' => 'menu_order',
-                    'has_archives' => false
-                ]);
-            } else {
-                $wpdb->update(
-                    $wpdb->prefix . 'woocommerce_attribute_taxonomies',
-                    ['attribute_label' => $colorLabel, 'attribute_name' => sanitize_title($colorLabel)],
-                    ['attribute_name' => sanitize_title($colorLabel)]
-                );
+                if (is_wp_error($result)) {
+                    return "Error creating attribute {$label}: " . $result->get_error_message();
+                }
+
                 wc_clear_attribute_cache();
+                return "Created new attribute: {$label}";
             }
-        }
+        };
+
+        $messages = [];
+        if ($sizeLabel)  $messages[] = $save_attribute($sizeLabel);
+        if ($colorLabel) $messages[] = $save_attribute($colorLabel);
     }
 
-    wp_send_json_success(['message' => 'Attributes saved successfully']);
+    wp_send_json_success(['message' => implode(' | ', $messages)]);
 }
+
 
 add_action('wp_ajax_oopos_save_extra_attributes', 'oopos_save_extra_attributes');
 function oopos_save_extra_attributes() {
