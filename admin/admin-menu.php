@@ -61,7 +61,7 @@ function oopos_connector_enqueue_scripts($hook) {
     if ($hook === 'toplevel_page_oopos-connector') {
         wp_enqueue_script(
             'oopos-admin-js',
-            plugin_dir_url(__FILE__) . 'admin-scripts.js',
+            plugin_dir_url(__FILE__) . './admin-scripts.js',
             array('jquery'),
             '1.0',
             true
@@ -72,7 +72,7 @@ function oopos_connector_enqueue_scripts($hook) {
     if ($hook === 'oopos-connector_page_oopos-connector-import') {
         wp_enqueue_script(
             'oopos-import-js',
-            plugin_dir_url(__FILE__) . '../import/import-script.js',
+            plugin_dir_url(__FILE__) . './import/import-script.js',
             array('jquery'),
             '1.0',
             true
