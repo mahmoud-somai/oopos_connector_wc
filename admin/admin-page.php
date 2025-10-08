@@ -138,6 +138,7 @@ function oopos_connector_page() {
         <div id="review-content"></div>
         <button type="button" id="back-step5" class="button">Previous</button>
         <button type="submit" class="button button-primary">Save Settings</button>
+        <button type="button" id="start-import" class="button button-primary">Start import</button>
 
     </form>
 </div>
