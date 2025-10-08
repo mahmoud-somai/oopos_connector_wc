@@ -36,10 +36,9 @@ function oopos_connector_menu() {
 
 // Settings page callback
 function oopos_connector_settings_page() {
-
-    include plugin_dir_path(__FILE__) . 'admin-page.php'; // settings page in admin folder
-
+    require_once plugin_dir_path(__FILE__) . 'admin-page.php';
 }
+
 
 // Import page callback
 function oopos_connector_import_page() {
