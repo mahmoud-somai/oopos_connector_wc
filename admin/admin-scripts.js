@@ -304,7 +304,7 @@ if (backStep4Btn) {
 
 
     // 👉 Skip button from Step 4 → Step 5
-    if (btnSkipExtra) {
+    if (skipExtraBtn) {
         skipExtraBtn.addEventListener('click', function() {
             showStep(step5);
         });
