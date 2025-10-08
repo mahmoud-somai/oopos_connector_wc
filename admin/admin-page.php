@@ -1,22 +1,21 @@
 <?php
 if (!defined('ABSPATH')) exit; // Security check
 echo '<p>Admin page loaded successfully</p>'; 
-if (!function_exists('oopos_connector_settings_page')) {
 
-    function oopos_connector_settings_page() {
-        $data = get_option('oopos_connector_data', array());
-        $shops_data = get_option('oopos_shops', array());
 
-        // Decode shops
-        $shops = array();
-        if (!empty($shops_data) && isset($shops_data['data']) && is_array($shops_data['data'])) {
-            foreach ($shops_data['data'] as $shop) {
-                if (isset($shop['Magasin'])) {
-                    $shops[] = $shop['Magasin'];
-                }
-            }
+   function oopos_connector_settings_content() {
+    $data = get_option('oopos_connector_data', array());
+    $shops_data = get_option('oopos_shops', array());
+
+    // Decode shops
+    $shops = [];
+    if (!empty($shops_data['data']) && is_array($shops_data['data'])) {
+        foreach ($shops_data['data']['data'] ?? [] as $shop) {
+            if (isset($shop['Magasin'])) $shops[] = $shop['Magasin'];
         }
-        ?>
+    }
+
+    ?>
         <div class="wrap">
             <h1>WELCOME TO OOPOS CONNECTOR BY IDVEY</h1>
 
@@ -133,4 +132,4 @@ if (!function_exists('oopos_connector_settings_page')) {
         <?php
     }
 
-}
+
