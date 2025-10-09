@@ -1,35 +1,36 @@
-jQuery(document).ready(function ($) {
-    $('#oopos-import-form').on('submit', function (e) {
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('oopos-import-form');
+
+    if (!form) return;
+
+    form.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        // Convert radio values to booleans
-        const skipNewProducts = $('input[name="skip_new_products"]:checked').val() === 'yes';
-        const existingProducts = $('input[name="existing_products"]:checked').val() === 'update';
-        const emptyValues = $('input[name="empty_values"]:checked').val() === 'update';
+        const formData = new FormData(form);
+        formData.append('action', 'oopos_save_import_settings');
+        formData.append('_wpnonce', ooposImportAjax.nonce);
 
-        const data = {
-            action: 'oopos_save_import_settings',
-            _wpnonce: $('input[name="_wpnonce"]').val(),
-            oopos_skip_new_product: skipNewProducts,
-            oopos_existing_products: existingProducts,
-            oopos_empty_values: emptyValues
-        };
-
-        $.post(ooposImportAjax.ajax_url, data, function (response) {
-            if (response.success) {
-                $('#import-result').html(
-                    `<div style="color:green;font-weight:600;margin-top:10px;">${response.data.message}</div>`
-                );
-            } else {
-                $('#import-result').html(
-                    `<div style="color:red;font-weight:600;margin-top:10px;">${response.data.message || 'Error saving settings.'}</div>`
-                );
-            }
-        }).fail(function (xhr) {
-            console.error('AJAX Error:', xhr);
-            $('#import-result').html(
-                `<div style="color:red;font-weight:600;margin-top:10px;">AJAX request failed. Check console.</div>`
-            );
-        });
+        fetch(ooposImportAjax.ajax_url, {
+            method: 'POST',
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                const resultDiv = document.getElementById('import-result');
+                if (data.success) {
+                    resultDiv.innerHTML =
+                        '<div class="notice notice-success"><p>' +
+                        data.data.message +
+                        '</p></div>';
+                } else {
+                    resultDiv.innerHTML =
+                        '<div class="notice notice-error"><p>Failed to save settings.</p></div>';
+                }
+            })
+            .catch((error) => {
+                console.error('AJAX Error:', error);
+                document.getElementById('import-result').innerHTML =
+                    '<div class="notice notice-error"><p>Unexpected error occurred.</p></div>';
+            });
     });
 });

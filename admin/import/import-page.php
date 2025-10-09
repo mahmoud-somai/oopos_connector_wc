@@ -2,6 +2,12 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+wp_enqueue_style(
+    'oopos-import-style',
+    plugin_dir_url(__FILE__) . 'import-style.css',
+    array(),
+    '1.0'
+);
 
 // Get saved options
 $skip_new_product = get_option('oopos_skip_new_product', false);

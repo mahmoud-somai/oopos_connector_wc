@@ -319,15 +319,16 @@ function oopos_enqueue_admin_scripts($hook) {
     }
 }
 
-// Handle AJAX Save
 add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
 function oopos_save_import_settings() {
     check_ajax_referer('oopos_import_nonce', '_wpnonce');
 
-    $skip_new = filter_var($_POST['oopos_skip_new_product'] ?? false, FILTER_VALIDATE_BOOLEAN);
-    $existing_update = filter_var($_POST['oopos_existing_products'] ?? false, FILTER_VALIDATE_BOOLEAN);
-    $empty_update = filter_var($_POST['oopos_empty_values'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    // Get posted form values
+    $skip_new = ($_POST['skip_new_products'] ?? 'no') === 'yes';
+    $existing_update = ($_POST['existing_products'] ?? 'skip') === 'update';
+    $empty_update = ($_POST['empty_values'] ?? 'skip') === 'update';
 
+    // Save options
     update_option('oopos_skip_new_product', $skip_new);
     update_option('oopos_existing_products', $existing_update);
     update_option('oopos_empty_values', $empty_update);
@@ -336,9 +337,11 @@ function oopos_save_import_settings() {
 }
 
 
+
 }
 
 
 
 
 
+    
