@@ -288,12 +288,45 @@ function oopos_save_extra_attributes() {
 // AJAX: Save Import Settings
 // ==========================
 
-function oopos_enqueue_admin_scripts($hook) {
-    if (strpos($hook, 'oopos_connector_import') !== false) {
-        wp_enqueue_script('oopos-import-script', plugin_dir_url(__FILE__) . 'import/import-script.js', ['jquery'], false, true);
+// in admin-menu.php (or a file included from plugin main)
+add_action('admin_enqueue_scripts', 'oopos_enqueue_admin_scripts');
+function oopos_enqueue_admin_scripts( $hook ) {
+    // get current screen safely
+    $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+    if ( ! $screen ) return;
+
+    // When the import page screen id matches this value load the import scripts.
+    // Typical screen id for a submenu created with parent 'oopos-connector' and slug 'oopos-connector-import'
+    // is: 'oopos-connector_page_oopos-connector-import'
+    if ( $screen->id === 'oopos-connector_page_oopos-connector-import' ) {
+
+        // CSS
+        wp_enqueue_style(
+            'oopos-import-style',
+            plugin_dir_url(__FILE__) . 'import/import-style.css',
+            array(),
+            '1.0'
+        );
+
+        // JS (in footer)
+        wp_enqueue_script(
+            'oopos-import-script',
+            plugin_dir_url(__FILE__) . 'import/import-script.js',
+            array('jquery'),
+            '1.0',
+            true
+        );
+
+        // localized data (ajax url + nonce)
+        wp_localize_script('oopos-import-script', 'ooposImportAjax', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('oopos_import_nonce')
+        ));
     }
 }
-add_action('admin_enqueue_scripts', 'oopos_enqueue_admin_scripts');
+
+
+
 
 add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
 function oopos_save_import_settings() {
