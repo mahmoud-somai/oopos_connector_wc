@@ -317,7 +317,6 @@ function oopos_enqueue_admin_scripts($hook) {
             'nonce'    => wp_create_nonce('oopos_import_nonce')
         ));
     }
-}
 
 
 // AJAX handler
