@@ -102,52 +102,48 @@ function oopos_start_import_products_external_sql() {
     // ✅ SQL clair et sans caractères parasites
     $sql_query = "SELECT * FROM produits";
 
-    $headers = [
-        'Accept' => 'application/json',
-        'Content-Type' => 'text/plain; charset=utf-8',
-    ];
-
-    // ✅ Forcer WordPress à ne RIEN encoder, ni transformer
-    $response = wp_remote_request($api_url, [
+     $args = [
         'method'    => 'PUT',
         'timeout'   => 60,
-        'headers'   => $headers,
-        'body'      => $sql_query, // texte brut
+        'headers'   => [
+            'Accept' => 'application/json',
+            'Content-Type' => 'text/plain',
+        ],
+        'body'      => $sql_query,
         'sslverify' => false,
-        'blocking'  => true,
-        'data_format' => 'body'
-    ]);
+    ];
+
+    // Envoi
+    $response = wp_remote_request($api_url, $args);
 
     if (is_wp_error($response)) {
-        wp_send_json_error(['message' => 'Failed to reach API: ' . $response->get_error_message()]);
+        wp_send_json_error(['message' => 'HTTP error: ' . $response->get_error_message()]);
     }
 
     $body = wp_remote_retrieve_body($response);
-    $json = json_decode($body, true);
+    $decoded = json_decode($body, true);
 
-    // ✅ Si OOPOS renvoie une erreur SQL, on la remonte telle quelle
-    if (!$json || !isset($json['result']) || $json['result'] !== 'ok') {
+    // Log pour debug
+    $upload_dir = wp_upload_dir();
+    file_put_contents($upload_dir['basedir'] . '/oopos_debug.txt', "Sent SQL:\n$sql_query\n\nResponse:\n$body");
+
+    // Vérification
+    if (!$decoded || !isset($decoded['result']) || $decoded['result'] !== 'ok') {
         wp_send_json_error([
             'message' => 'Invalid API response.',
-            'raw' => $body
+            'raw' => $body,
         ]);
     }
 
-    $data = $json['data'];
+    $data = $decoded['data'];
 
-    // ✅ Sauvegarde JSON
-    $upload_dir = wp_upload_dir();
+    // Sauvegarde du résultat
     $file_path = $upload_dir['basedir'] . '/res.json';
     $file_url = $upload_dir['baseurl'] . '/res.json';
-
-    $json_data = wp_json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-
-    if (file_put_contents($file_path, $json_data) === false) {
-        wp_send_json_error(['message' => 'Failed to write JSON file.']);
-    }
+    file_put_contents($file_path, wp_json_encode($data, JSON_PRETTY_PRINT));
 
     wp_send_json_success([
         'message' => 'Products fetched successfully!',
-        'file' => $file_url
+        'file' => $file_url,
     ]);
 }
