@@ -99,47 +99,43 @@ add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_e
 
 function oopos_start_import_products_external_sql() {
      $api_url = 'https://api.oopos.fr/api/v2/query.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
- $sql_query = "SELECT * FROM produits;"; // <-- important semicolon
+ $sql_query = "SELECT * FROM produits;";
 
-    $ch = curl_init($api_url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, trim($sql_query));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        "Accept: application/json",
-        "Content-Type: text/plain",
-        "Content-Length: " . strlen(trim($sql_query)),
-    ]);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+$args = [
+    'method'  => 'PUT',
+    'headers' => [
+        'Accept'        => 'application/json',
+        'Content-Type'  => 'text/plain',
+    ],
+    'body'    => $sql_query,
+    'timeout' => 30,
+    'sslverify' => false, // Optional: disable SSL verification if needed
+];
 
-    $response = curl_exec($ch);
-    $error = curl_error($ch);
-    curl_close($ch);
+$response = wp_remote_request($api_url, $args);
 
-    $upload_dir = wp_upload_dir();
-    file_put_contents($upload_dir['basedir'] . '/oopos_debug.txt', "Sent SQL:\n$sql_query\n\nResponse:\n$response");
+if (is_wp_error($response)) {
+    wp_send_json_error(['message' => $response->get_error_message()]);
+}
 
-    if ($error) {
-        wp_send_json_error(['message' => 'cURL error: ' . $error]);
-    }
+$body = wp_remote_retrieve_body($response);
+$decoded = json_decode($body, true);
 
-    $decoded = json_decode($response, true);
-
-    if (!$decoded || !isset($decoded['result']) || $decoded['result'] !== 'ok') {
-        wp_send_json_error([
-            'message' => 'Invalid API response.',
-            'raw' => $response,
-        ]);
-    }
-
-    $data = $decoded['data'];
-
-    $file_path = $upload_dir['basedir'] . '/res.json';
-    $file_url = $upload_dir['baseurl'] . '/res.json';
-    file_put_contents($file_path, wp_json_encode($data, JSON_PRETTY_PRINT));
-
-    wp_send_json_success([
-        'message' => 'Products fetched successfully!',
-        'file' => $file_url,
+if (!$decoded || !isset($decoded['result']) || $decoded['result'] !== 'ok') {
+    wp_send_json_error([
+        'message' => 'Invalid API response',
+        'raw' => $body,
     ]);
 }
+
+$data = $decoded['data'];
+
+$upload_dir = wp_upload_dir();
+$file_path = $upload_dir['basedir'] . '/res.json';
+$file_url = $upload_dir['baseurl'] . '/res.json';
+file_put_contents($file_path, wp_json_encode($data, JSON_PRETTY_PRINT));
+
+wp_send_json_success([
+    'message' => 'Products fetched successfully!',
+    'file' => $file_url,
+]);
