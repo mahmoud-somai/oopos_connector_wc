@@ -288,19 +288,15 @@ function oopos_save_extra_attributes() {
 // AJAX: Save Import Settings
 // ==========================
 
-// in admin-menu.php (or a file included from plugin main)
+// Enqueue styles/scripts for the import page
 add_action('admin_enqueue_scripts', 'oopos_enqueue_admin_scripts');
-function oopos_enqueue_admin_scripts( $hook ) {
-    // get current screen safely
+function oopos_enqueue_admin_scripts($hook) {
     $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-    if ( ! $screen ) return;
+    if (!$screen) return;
 
-    // When the import page screen id matches this value load the import scripts.
-    // Typical screen id for a submenu created with parent 'oopos-connector' and slug 'oopos-connector-import'
-    // is: 'oopos-connector_page_oopos-connector-import'
-    if ( $screen->id === 'oopos-connector_page_oopos-connector-import' ) {
+    // adjust this slug if different
+    if ($screen->id === 'oopos-connector_page_oopos-connector-import') {
 
-        // CSS
         wp_enqueue_style(
             'oopos-import-style',
             plugin_dir_url(__FILE__) . 'import/import-style.css',
@@ -308,7 +304,6 @@ function oopos_enqueue_admin_scripts( $hook ) {
             '1.0'
         );
 
-        // JS (in footer)
         wp_enqueue_script(
             'oopos-import-script',
             plugin_dir_url(__FILE__) . 'import/import-script.js',
@@ -317,7 +312,6 @@ function oopos_enqueue_admin_scripts( $hook ) {
             true
         );
 
-        // localized data (ajax url + nonce)
         wp_localize_script('oopos-import-script', 'ooposImportAjax', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('oopos_import_nonce')
@@ -325,37 +319,21 @@ function oopos_enqueue_admin_scripts( $hook ) {
     }
 }
 
-
-
-
+// Handle AJAX Save
 add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
 function oopos_save_import_settings() {
-    // nonce param name in our JS is `_wpnonce`
     check_ajax_referer('oopos_import_nonce', '_wpnonce');
 
-    // read both string inputs and boolean keyed values (JS sends both to be safe)
-    $skip_new_products_raw = $_POST['skip_new_products'] ?? null;
-    $existing_products_raw = $_POST['existing_products'] ?? null;
-    $empty_values_raw = $_POST['empty_values'] ?? null;
+    $skip_new = filter_var($_POST['oopos_skip_new_product'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    $existing_update = filter_var($_POST['oopos_existing_products'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    $empty_update = filter_var($_POST['oopos_empty_values'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
-    // Also accept boolean-flavored keys (sent as booleans)
-    $skip_new_products_bool = isset($_POST['oopos_skip_new_product']) ? filter_var($_POST['oopos_skip_new_product'], FILTER_VALIDATE_BOOLEAN) : null;
-    $existing_products_bool = isset($_POST['oopos_existing_products']) ? filter_var($_POST['oopos_existing_products'], FILTER_VALIDATE_BOOLEAN) : null;
-    $empty_values_bool = isset($_POST['oopos_empty_values']) ? filter_var($_POST['oopos_empty_values'], FILTER_VALIDATE_BOOLEAN) : null;
+    update_option('oopos_skip_new_product', $skip_new);
+    update_option('oopos_existing_products', $existing_update);
+    update_option('oopos_empty_values', $empty_update);
 
-    // Decide final booleans (preference order: boolean keys > form string keys)
-    $skip_new = is_bool($skip_new_products_bool) ? $skip_new_products_bool : ($skip_new_products_raw === 'yes');
-    $existing_update = is_bool($existing_products_bool) ? $existing_products_bool : ($existing_products_raw === 'update');
-    $empty_update = is_bool($empty_values_bool) ? $empty_values_bool : ($empty_values_raw === 'update');
-
-    // Save in options (booleans)
-    update_option('oopos_skip_new_product', (bool) $skip_new);
-    update_option('oopos_existing_products', (bool) $existing_update);
-    update_option('oopos_empty_values', (bool) $empty_update);
-
-    wp_send_json_success(array('message' => 'Import settings saved successfully'));
+    wp_send_json_success(['message' => 'Import settings saved successfully!']);
 }
-
 
 
 }
