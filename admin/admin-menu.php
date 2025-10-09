@@ -287,6 +287,14 @@ function oopos_save_extra_attributes() {
     // ==========================
 // AJAX: Save Import Settings
 // ==========================
+
+function oopos_enqueue_admin_scripts($hook) {
+    if (strpos($hook, 'oopos_connector_import') !== false) {
+        wp_enqueue_script('oopos-import-script', plugin_dir_url(__FILE__) . 'import/import-script.js', ['jquery'], false, true);
+    }
+}
+add_action('admin_enqueue_scripts', 'oopos_enqueue_admin_scripts');
+
 add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
 function oopos_save_import_settings() {
     check_ajax_referer('oopos_import_nonce', '_wpnonce');
