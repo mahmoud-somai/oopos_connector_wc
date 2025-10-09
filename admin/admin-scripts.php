@@ -99,44 +99,61 @@ add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_e
 
 function oopos_start_import_products_external_sql() {
      $api_url = 'https://api.oopos.fr/api/v2/query.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
- $sql_query = "SELECT * FROM produits WHERE ecommerce=1; ";
+  // ✅ Clean and precise SQL (no hidden newlines or spaces)
+    $sql_query = trim("SELECT * FROM produits WHERE ecommerce=1;");
 
-$args = [
-    'method'  => 'PUT',
-    'headers' => [
-        'Accept'        => 'application/json',
-        'Content-Type'  => 'text/plain',
-    ],
-    'body'    => $sql_query,
-    'timeout' => 30,
-    'sslverify' => false, // Optional: disable SSL verification if needed
-];
+    // ✅ Prepare request arguments
+    $args = [
+        'method'  => 'PUT',
+        'headers' => [
+            'Accept'        => 'application/json',
+            'Content-Type'  => 'text/plain; charset=UTF-8',
+        ],
+        'body'      => $sql_query,
+        'timeout'   => 60,
+        'sslverify' => false, // only if you have SSL issues
+    ];
 
-$response = wp_remote_request($api_url, $args);
+    // ✅ Send request
+    $response = wp_remote_request($api_url, $args);
 
-if (is_wp_error($response)) {
-    wp_send_json_error(['message' => $response->get_error_message()]);
-}
+    // ✅ Handle HTTP or network errors
+    if (is_wp_error($response)) {
+        wp_send_json_error(['message' => 'HTTP error: ' . $response->get_error_message()]);
+    }
 
-$body = wp_remote_retrieve_body($response);
-$decoded = json_decode($body, true);
+    // ✅ Retrieve and decode response
+    $body = wp_remote_retrieve_body($response);
+    $decoded = json_decode($body, true);
 
-if (!$decoded || !isset($decoded['result']) || $decoded['result'] !== 'ok') {
-    wp_send_json_error([
-        'message' => 'Invalid API response',
-        'raw' => $body,
+    // ✅ Log request + response for debugging
+    $upload_dir = wp_upload_dir();
+    $debug_path = $upload_dir['basedir'] . '/oopos_debug.txt';
+    file_put_contents(
+        $debug_path,
+        "Sent SQL:\n" . $sql_query . "\n\nResponse:\n" . $body
+    );
+
+    // ✅ Check response validity
+    if (!$decoded || !isset($decoded['result']) || $decoded['result'] !== 'ok') {
+        wp_send_json_error([
+            'message' => 'Invalid API response',
+            'raw' => $body,
+            'debug_file' => $debug_path,
+        ]);
+    }
+
+    // ✅ Extract and save data
+    $data = $decoded['data'];
+    $file_path = $upload_dir['basedir'] . '/res.json';
+    $file_url = $upload_dir['baseurl'] . '/res.json';
+
+    file_put_contents($file_path, wp_json_encode($data, JSON_PRETTY_PRINT));
+
+    // ✅ Return success response
+    wp_send_json_success([
+        'message' => 'Products fetched successfully!',
+        'file' => $file_url,
+        'debug_file' => $debug_path,
     ]);
-}
-
-$data = $decoded['data'];
-
-$upload_dir = wp_upload_dir();
-$file_path = $upload_dir['basedir'] . '/res.json';
-$file_url = $upload_dir['baseurl'] . '/res.json';
-file_put_contents($file_path, wp_json_encode($data, JSON_PRETTY_PRINT));
-
-wp_send_json_success([
-    'message' => 'Products fetched successfully!',
-    'file' => $file_url,
-]);
 }
