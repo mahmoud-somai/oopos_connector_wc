@@ -6,6 +6,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const step1 = form.querySelector('[data-step="1"]');
     const step2 = form.querySelector('[data-step="2"]');
+
+    // Create Next button but keep it hidden initially
+    let nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.textContent = 'Next';
+    nextBtn.className = 'button button-primary';
+    nextBtn.style.display = 'none'; // hidden at start
+    step1.querySelector('.submit-section').appendChild(nextBtn);
+
     const backBtn = document.getElementById('back-btn');
     const startImportBtn = document.getElementById('start-import-btn');
 
@@ -37,9 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">${res.data.message}</div>`;
                 setTimeout(() => { resultDiv.innerHTML = ''; }, 3000);
 
-                // Move to Step 2
-                step1.style.display = 'none';
-                step2.style.display = 'block';
+                // Show Next button after saving
+                nextBtn.style.display = 'inline-block';
             } else {
                 resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">${res.data.message || 'Error saving settings.'}</div>`;
             }
@@ -48,6 +56,12 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('AJAX Error:', err);
             resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">AJAX request failed.</div>`;
         });
+    });
+
+    // Step 1: Next button click → show Step 2
+    nextBtn.addEventListener('click', function() {
+        step1.style.display = 'none';
+        step2.style.display = 'block';
     });
 
     // Step 2: Back button
