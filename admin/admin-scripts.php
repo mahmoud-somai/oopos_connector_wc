@@ -98,8 +98,24 @@ function oopos_save_import_settings() {
 add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_external_sql');
 
 function oopos_start_import_products_external_sql() {
-     $api_url = 'https://api.oopos.fr/api/v2/query.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
-  // ✅ Clean and precise SQL (no hidden newlines or spaces)
+   $connector_data = get_option('oopos_connector_data');
+
+    if (
+        !is_array($connector_data) ||
+        empty($connector_data['domain']) ||
+        empty($connector_data['enseigne']) ||
+        empty($connector_data['api_key'])
+    ) {
+        wp_send_json_error(['message' => 'Connector data is missing or invalid.']);
+    }
+
+    // ✅ Clean up potential extra quotes or slashes
+    $domain   = rtrim(trim($connector_data['domain'], "'\"/"), '/') . '/';
+    $enseigne = trim($connector_data['enseigne'], "'\"");
+    $api_key  = trim($connector_data['api_key'], "'\"");
+
+    // ✅ Build the dynamic API URL
+    $api_url = $domain . 'api/v2/query.do?enseigne=' . urlencode($enseigne) . '&api-key=' . urlencode($api_key);
     $sql_query = trim("SELECT * FROM produits WHERE ecommerce=1;");
 
     // ✅ Prepare request arguments
