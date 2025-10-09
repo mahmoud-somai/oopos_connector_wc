@@ -297,14 +297,14 @@ function oopos_enqueue_admin_scripts($hook) {
 
     wp_enqueue_style(
         'oopos-import-style',
-        plugin_dir_url(__FILE__) . 'import/import-style.css',
+        plugin_dir_url(__FILE__) . './import/import-style.css',
         [],
         '1.0'
     );
 
     wp_enqueue_script(
         'oopos-import-script',
-        plugin_dir_url(__FILE__) . 'import/import-script.js',
+        plugin_dir_url(__FILE__) . './import/import-script.js',
         [], // no jQuery if using vanilla JS
         '1.0',
         true
