@@ -69,43 +69,37 @@
   font-size: 17px;
   padding: 10px 28px;
 }
-
 #oopos-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 99999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
 }
 
 .oopos-overlay-content {
-    background: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    width: 400px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-    text-align: left;
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  width: 400px;
+  text-align: left;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
 #oopos-progress-list {
-    list-style: none;
-    padding-left: 0;
-    margin-top: 15px;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
 }
 
 #oopos-progress-list li {
-    margin: 8px 0;
-    font-size: 15px;
-}
-
-#oopos-progress-list li.done {
-    color: green;
-    font-weight: 600;
-}
-
-#oopos-progress-list li.error {
-    color: red;
-    font-weight: 600;
+  margin: 10px 0;
+  font-size: 15px;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
