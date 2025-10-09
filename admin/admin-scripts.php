@@ -86,4 +86,3 @@ function oopos_save_import_settings() {
 
     wp_send_json_success(['message' => 'Import settings saved successfully!']);
 }
-
