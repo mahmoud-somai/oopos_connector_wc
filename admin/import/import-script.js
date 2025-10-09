@@ -104,18 +104,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Step 2: Start Import button
- startImportBtn.addEventListener('click', function() {
+  startImportBtn.addEventListener('click', function() {
         overlay.style.display = 'flex';
         closeBtn.style.display = 'none';
 
-        // Reset steps UI
+        // Reset all steps to ⏳
         [step1Status, step2Status, step3Status, step4Status].forEach(el => {
             el.textContent = el.textContent.replace('✅', '⏳').replace('❌', '⏳');
             el.style.color = '';
         });
 
-        // Animate step 1
+        // Step 1
         step1Status.textContent = '✅ Starting import process...';
+        step1Status.style.color = 'green';
 
         const data = new URLSearchParams();
         data.append('action', 'oopos_start_import_products');
@@ -131,17 +132,18 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(res => {
             // Step 2
             step2Status.textContent = '✅ Fetching products...';
+            step2Status.style.color = 'green';
 
             if (res.success) {
                 // Step 3
                 step3Status.textContent = '✅ Products fetched successfully.';
                 step3Status.style.color = 'green';
 
-                // Step 4 (file)
+                // Step 4 (file creation)
                 setTimeout(() => {
                     step4Status.textContent = '✅ File created successfully.';
                     step4Status.style.color = 'green';
-                    closeBtn.style.display = 'inline-block';
+                    closeBtn.style.display = 'inline-block'; // show close button
                 }, 1000);
 
                 resultDiv.innerHTML = `

@@ -73,27 +73,21 @@
 /* Overlay background */
 #oopos-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: none; /* hidden by default */
-    align-items: center;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: none;
     justify-content: center;
+    align-items: center;
     z-index: 9999;
 }
-
-/* Overlay content box */
 .oopos-overlay-content {
     background: #fff;
-    padding: 30px 40px;
-    border-radius: 12px;
-    text-align: center;
+    padding: 30px;
+    border-radius: 10px;
     width: 400px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
 }
-
 #oopos-overlay h2 {
     margin-bottom: 20px;
 }
