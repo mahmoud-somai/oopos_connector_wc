@@ -139,3 +139,4 @@ wp_send_json_success([
     'message' => 'Products fetched successfully!',
     'file' => $file_url,
 ]);
+}
