@@ -77,24 +77,36 @@ startImportBtn.addEventListener('click', function() {
 
     resultDiv.innerHTML = `<div style="color:blue;font-weight:600;margin-top:10px;">Importing products...</div>`;
 
+    // Use FormData or URLSearchParams
     const data = new URLSearchParams();
     data.append('action', 'oopos_start_import_products');
 
     fetch(ooposImportAjax.ajax_url, {
-        method: 'POST',
-        body: data
+        method: 'POST', // change GET → POST
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded', // required for URLSearchParams
+        },
+        body: data.toString()
     })
     .then(res => res.json())
     .then(res => {
         if (res.success) {
-            resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">${res.data.message} <br> File saved at: <a href="${res.data.file}" target="_blank">res.json</a></div>`;
+            resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">
+                ${res.data.message} <br> 
+                File saved at: <a href="${res.data.file}" target="_blank">res.json</a>
+            </div>`;
         } else {
-            resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">${res.data.message || 'Error importing products.'}</div>`;
+            resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">
+                ${res.data.message || 'Error importing products.'}
+            </div>`;
         }
     })
     .catch(err => {
         console.error('AJAX Error:', err);
-        resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">AJAX request failed.</div>`;
+        resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">
+            AJAX request failed.
+        </div>`;
     });
 });
+
 });
