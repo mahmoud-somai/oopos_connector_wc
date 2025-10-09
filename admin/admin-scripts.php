@@ -99,45 +99,49 @@ add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_e
 
 function oopos_start_import_products_external_sql() {
      $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
-    // ✅ SQL clair et sans caractères parasites
-    $sql_query = "SELECT * FROM produits";
+ $sql_query = "SELECT * FROM produits";
 
-     $args = [
-        'method'    => 'PUT',
-        'timeout'   => 60,
-        'headers'   => [
-            'Accept' => 'application/json',
-            'Content-Type' => 'text/plain',
-        ],
-        'body'      => $sql_query,
-        'sslverify' => false,
-    ];
+    // Initialize cURL
+    $ch = curl_init($api_url);
 
-    // Envoi
-    $response = wp_remote_request($api_url, $args);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $sql_query);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Accept: application/json",
+        "Content-Type: text/plain",
+        "Content-Length: " . strlen($sql_query),
+    ]);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // same as sslverify => false
 
-    if (is_wp_error($response)) {
-        wp_send_json_error(['message' => 'HTTP error: ' . $response->get_error_message()]);
+    // Execute
+    $response = curl_exec($ch);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    if ($error) {
+        wp_send_json_error(['message' => 'cURL error: ' . $error]);
     }
 
-    $body = wp_remote_retrieve_body($response);
-    $decoded = json_decode($body, true);
+    $decoded = json_decode($response, true);
 
-    // Log pour debug
+    // Log raw data for debugging
     $upload_dir = wp_upload_dir();
-    file_put_contents($upload_dir['basedir'] . '/oopos_debug.txt', "Sent SQL:\n$sql_query\n\nResponse:\n$body");
+    file_put_contents(
+        $upload_dir['basedir'] . '/oopos_debug.txt',
+        "Sent SQL:\n$sql_query\n\nResponse:\n$response"
+    );
 
-    // Vérification
     if (!$decoded || !isset($decoded['result']) || $decoded['result'] !== 'ok') {
         wp_send_json_error([
             'message' => 'Invalid API response.',
-            'raw' => $body,
+            'raw' => $response,
         ]);
     }
 
     $data = $decoded['data'];
 
-    // Sauvegarde du résultat
+    // Save response to res.json
     $file_path = $upload_dir['basedir'] . '/res.json';
     $file_url = $upload_dir['baseurl'] . '/res.json';
     file_put_contents($file_path, wp_json_encode($data, JSON_PRETTY_PRINT));
