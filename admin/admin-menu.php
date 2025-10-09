@@ -33,10 +33,6 @@ function oopos_connector_menu() {
         'oopos_connector_import_page'    // Callback function
     );
 }   
-// function oopos_connector_settings_page() {
-
-//     include plugin_dir_path(__FILE__) . 'admin-page.php'; // settings page in admin folder
-// }
 
 function oopos_connector_import_page() {
     echo '<div class="wrap">';
