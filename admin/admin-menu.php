@@ -35,10 +35,9 @@ function oopos_connector_menu() {
 }   
 
 function oopos_connector_import_page() {
-    echo '<div class="wrap">';
-    echo '<h1>OOPOS Connector - Import</h1>';
+ 
     include plugin_dir_path(__FILE__) . './import/import-page.php';
-    echo '</div>';
+
 }
 
 
