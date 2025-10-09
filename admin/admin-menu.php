@@ -294,16 +294,7 @@ function oopos_enqueue_admin_scripts($hook) {
     $screen = function_exists('get_current_screen') ? get_current_screen() : null;
     if (!$screen) return;
 
-    // adjust this slug if different
     if ($screen->id === 'oopos-connector_page_oopos-connector-import') {
-
-        wp_enqueue_style(
-            'oopos-import-style',
-            plugin_dir_url(__FILE__) . 'import/import-style.css',
-            array(),
-            '1.0'
-        );
-
         wp_enqueue_script(
             'oopos-import-script',
             plugin_dir_url(__FILE__) . 'import/import-script.js',
@@ -311,13 +302,9 @@ function oopos_enqueue_admin_scripts($hook) {
             '1.0',
             true
         );
-
-        wp_localize_script('oopos-import-script', 'ooposImportAjax', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('oopos_import_nonce')
-        ));
     }
 }
+
 
 add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
 function oopos_save_import_settings() {
@@ -344,4 +331,3 @@ function oopos_save_import_settings() {
 
 
 
-    
