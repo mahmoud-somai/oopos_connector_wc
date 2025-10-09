@@ -6,10 +6,16 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Read current values (always)
-        const skipNewProducts = document.querySelector('input[name="skip_new_products"]:checked')?.value === 'yes';
-        const existingProducts = document.querySelector('input[name="existing_products"]:checked')?.value === 'update';
-        const emptyValues = document.querySelector('input[name="empty_values"]:checked')?.value === 'update';
+        // Always read values or set default
+        const skipRadio = document.querySelector('input[name="skip_new_products"]:checked');
+        const skipNewProducts = skipRadio ? skipRadio.value === 'yes' : false;
+
+        const existingRadio = document.querySelector('input[name="existing_products"]:checked');
+        const existingProducts = existingRadio ? existingRadio.value === 'update' : false;
+
+        const emptyRadio = document.querySelector('input[name="empty_values"]:checked');
+        const emptyValues = emptyRadio ? emptyRadio.value === 'update' : false;
+
         const nonce = document.querySelector('input[name="_wpnonce"]').value;
 
         const data = new URLSearchParams();
@@ -23,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             body: data
         })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(res => {
             if (res.success) {
                 resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">${res.data.message}</div>`;

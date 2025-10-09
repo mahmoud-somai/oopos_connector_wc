@@ -84,5 +84,6 @@ function oopos_save_import_settings() {
     update_option('oopos_existing_products', $existing_update);
     update_option('oopos_empty_values', $empty_update);
 
+
     wp_send_json_success(['message' => 'Import settings saved successfully!']);
 }
