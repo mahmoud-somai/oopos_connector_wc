@@ -92,7 +92,7 @@ function oopos_save_import_settings() {
 add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_external');
 
 function oopos_start_import_products_external() {
-    $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
+    $api_url = 'https://api.oopos.fr/api/v2/enseigne/api-key';
 
     // Fetch external API
     $response = wp_remote_get($api_url, [
@@ -111,26 +111,39 @@ function oopos_start_import_products_external() {
         wp_send_json_error(['message' => 'Invalid JSON response from API.']);
     }
 
-    // === SQL SELECT simulation ===
-    // Remove magasin filter, keep only ecommerce=1 if needed
+    // Columns to "SELECT"
+    $columns = [
+        'Produit', 'Designation', 'Saison', 'Rayon', 'Famille', 'SousFamille', 'Marque',
+        'Collection', 'Modele', 'Matiere', 'Decimales_Quantite', 'Unite', 'Conditionnement_Achat',
+        'Conditionnement_Vente', 'Utilisateur_Creation', 'Utilisateur_Modification', 'Descriptif',
+        'ecommerce', 'Serialise', 'Lien_Externe', 'Actif', 'Fournisseur', 'cumul_achat_quantite',
+        'cumul_achat_valeur', 'smart_show', 'Exclure_Fidelite', 'Cle_mep', 'Tags', 'Emplacement'
+    ];
+
+    // Filter and pick only the columns for ecommerce=1
     $filtered = array_filter($data, function($item) {
         return isset($item['ecommerce']) && $item['ecommerce'] == 1;
     });
 
-    // Save filtered data to JSON
+    $result = array_map(function($item) use ($columns) {
+        return array_intersect_key($item, array_flip($columns));
+    }, $filtered);
+
+    // Save to JSON file
     $upload_dir = wp_upload_dir();
     $file_path = $upload_dir['basedir'] . '/res.json';
     $file_url = $upload_dir['baseurl'] . '/res.json';
 
-    $json_data = wp_json_encode(array_values($filtered), JSON_PRETTY_PRINT);
+    $json_data = wp_json_encode(array_values($result), JSON_PRETTY_PRINT);
 
     if (file_put_contents($file_path, $json_data) === false) {
         wp_send_json_error(['message' => 'Failed to write JSON file.']);
     }
 
     wp_send_json_success([
-        'message' => 'Products filtered and saved successfully!',
+        'message' => 'Products selected and saved successfully!',
         'file' => $file_url
     ]);
 }
+
 
