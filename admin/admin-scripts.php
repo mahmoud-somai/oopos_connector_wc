@@ -99,7 +99,7 @@ add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_e
 
 function oopos_start_import_products_external_sql() {
      $api_url = 'https://api.oopos.fr/api/v2/query.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
- $sql_query = "SELECT * FROM produits;";
+ $sql_query = "SELECT * FROM produits WHERE ecommerce=1 ; ";
 
 $args = [
     'method'  => 'PUT',
