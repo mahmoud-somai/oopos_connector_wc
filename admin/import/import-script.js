@@ -6,15 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Always read values or set default
-        const skipRadio = document.querySelector('input[name="skip_new_products"]:checked');
-        const skipNewProducts = skipRadio ? skipRadio.value === 'yes' : false;
-
-        const existingRadio = document.querySelector('input[name="existing_products"]:checked');
-        const existingProducts = existingRadio ? existingRadio.value === 'update' : false;
-
-        const emptyRadio = document.querySelector('input[name="empty_values"]:checked');
-        const emptyValues = emptyRadio ? emptyRadio.value === 'update' : false;
+        // Read each radio, default to false if nothing selected
+        const skipNewProducts = (document.querySelector('input[name="skip_new_products"]:checked')?.value === 'yes') || false;
+        const existingProducts = (document.querySelector('input[name="existing_products"]:checked')?.value === 'update') || false;
+        const emptyValues = (document.querySelector('input[name="empty_values"]:checked')?.value === 'update') || false;
 
         const nonce = document.querySelector('input[name="_wpnonce"]').value;
 
@@ -24,6 +19,13 @@ document.addEventListener('DOMContentLoaded', function() {
         data.append('oopos_skip_new_product', skipNewProducts);
         data.append('oopos_existing_products', existingProducts);
         data.append('oopos_empty_values', emptyValues);
+                // Log the values being sent
+        console.log('Sending AJAX data:', {
+            skipNewProducts,
+            existingProducts,
+            emptyValues,
+            nonce
+        });
 
         fetch(ooposImportAjax.ajax_url, {
             method: 'POST',
