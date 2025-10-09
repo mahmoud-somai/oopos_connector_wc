@@ -305,7 +305,7 @@ function oopos_enqueue_admin_scripts($hook) {
     wp_enqueue_script(
         'oopos-import-script',
         plugin_dir_url(__FILE__) . 'import/import-script.js',
-        [],
+        [], // no jQuery if using vanilla JS
         '1.0',
         true
     );
@@ -314,6 +314,8 @@ function oopos_enqueue_admin_scripts($hook) {
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce'    => wp_create_nonce('oopos_import_nonce')
     ]);
+
+    
 }
 
 
