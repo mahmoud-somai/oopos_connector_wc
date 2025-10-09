@@ -96,8 +96,13 @@ function oopos_start_import_products_external_sql() {
     $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
 
     // Your SQL query
-    $sql_query = "
-        SELECT Produit, Designation, Saison, Rayon, Famille, SousFamille, Marque, Collection, Rayon, Famille, SousFamille, Marque,
+    $sql_query = " SELECT Produit,
+            Designation,
+            Saison,
+            Rayon,
+            Famille,
+            SousFamille,
+            Marque,
             Collection,
             Modele,
             Matiere,
