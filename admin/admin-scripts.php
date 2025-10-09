@@ -92,7 +92,7 @@ function oopos_save_import_settings() {
 add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_external');
 
 function oopos_start_import_products_external() {
-    $api_url = 'https://api.oopos.fr/api/v2/enseigne/api-key';
+     $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
 
     // Fetch external API
     $response = wp_remote_get($api_url, [
