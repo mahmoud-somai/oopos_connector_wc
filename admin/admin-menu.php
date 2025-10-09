@@ -289,41 +289,43 @@ function oopos_save_extra_attributes() {
 // ==========================
 
 /// Enqueue scripts and styles for the import page
-add_action('admin_enqueue_scripts', function($hook) {
-
+add_action('admin_enqueue_scripts', 'oopos_enqueue_admin_scripts');
+function oopos_enqueue_admin_scripts($hook) {
     $screen = function_exists('get_current_screen') ? get_current_screen() : null;
     if (!$screen) return;
 
-    // Adjust this to your exact screen ID (check with console.log($screen->id))
+    // Only enqueue for your import page
     if ($screen->id === 'oopos-connector_page_oopos-connector-import') {
 
         // CSS
         wp_enqueue_style(
             'oopos-import-style',
-            plugin_dir_url(__FILE__) . './import/import-style.css',
-            [],
+            plugin_dir_url(__FILE__) . 'import/import-style.css',
+            array(),
             '1.0'
         );
 
-            wp_enqueue_script(
-        'oopos-import-script',
-        plugin_dir_url(__FILE__) . './import/import-script.js', // check the path
-        array(), // no dependencies for vanilla JS
-        '1.0',
-        true // load in footer
-    );
+        // JS
+        wp_enqueue_script(
+            'oopos-import-script',
+            plugin_dir_url(__FILE__) . 'import/import-script.js', // correct path from admin-menu.php
+            array(), // no dependency for vanilla JS
+            '1.0',
+            true // footer
+        );
 
-        // Localize AJAX data
-        wp_localize_script('oopos-import-script', 'ooposImportAjax', [
+        // pass AJAX URL and nonce
+        wp_localize_script('oopos-import-script', 'ooposImportAjax', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('oopos_import_nonce')
-        ]);
+        ));
     }
-});
+}
+
 
 // AJAX handler
-add_action('wp_ajax_oopos_save_import_settings', function() {
-
+add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
+function oopos_save_import_settings() {
     check_ajax_referer('oopos_import_nonce', '_wpnonce');
 
     $skip_new = filter_var($_POST['oopos_skip_new_product'] ?? false, FILTER_VALIDATE_BOOLEAN);
@@ -335,7 +337,8 @@ add_action('wp_ajax_oopos_save_import_settings', function() {
     update_option('oopos_empty_values', $empty_update);
 
     wp_send_json_success(['message' => 'Import settings saved successfully!']);
-});
+}
+
 
 }
 
