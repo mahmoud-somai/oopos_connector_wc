@@ -33,8 +33,13 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(res => res.json())
         .then(res => {
-            if (res.success) {
+ if (res.success) {
                 resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">${res.data.message}</div>`;
+
+                // Hide message after 3 seconds
+                setTimeout(() => {
+                    resultDiv.innerHTML = '';
+                }, 3000);
             } else {
                 resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">${res.data.message || 'Error saving settings.'}</div>`;
             }
