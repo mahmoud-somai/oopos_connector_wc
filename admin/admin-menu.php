@@ -291,16 +291,13 @@ function oopos_save_extra_attributes() {
 /// Enqueue scripts and styles for the import page
 add_action('admin_enqueue_scripts', 'oopos_enqueue_admin_scripts');
 function oopos_enqueue_admin_scripts($hook) {
-    $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-    if (!$screen) return;
-
-    // Only enqueue for your import page
-    if ($screen->id === 'oopos-connector_page_oopos-connector-import') {
-
+    $screen = get_current_screen();
+    if ($screen->id !== 'oopos-connector_page_oopos-connector-import') return;
+    
         // CSS
         wp_enqueue_style(
             'oopos-import-style',
-            plugin_dir_url(__FILE__) . 'import/import-style.css',
+            plugin_dir_url(__FILE__) . './import/import-style.css',
             array(),
             '1.0'
         );
@@ -308,8 +305,8 @@ function oopos_enqueue_admin_scripts($hook) {
         // JS
         wp_enqueue_script(
             'oopos-import-script',
-            plugin_dir_url(__FILE__) . 'import/import-script.js', // correct path from admin-menu.php
-            array(), // no dependency for vanilla JS
+            plugin_dir_url(__FILE__) . './import/import-script.js', // correct path from admin-menu.php
+            array('jquery'), // no dependency for vanilla JS
             '1.0',
             true // footer
         );
