@@ -289,33 +289,7 @@ function oopos_save_extra_attributes() {
 // ==========================
 
 
-    $screen = get_current_screen();
-    if ($screen->id !== 'oopos-connector_page_oopos-connector-import') return;
     
-        // CSS
-        wp_enqueue_style(
-            'oopos-import-style',
-            plugin_dir_url(__FILE__) . './import/import-style.css',
-            array(),
-            '1.0'
-        );
-
-        // JS
-        wp_enqueue_script(
-            'oopos-import-script',
-            plugin_dir_url(__FILE__) . './import/import-script.js', // correct path from admin-menu.php
-            array('jquery'), // no dependency for vanilla JS
-            '1.0',
-            true // footer
-        );
-
-        // pass AJAX URL and nonce
-        wp_localize_script('oopos-import-script', 'ooposImportAjax', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('oopos_import_nonce')
-        ));
-    }
-
 
 // AJAX handler
 add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
