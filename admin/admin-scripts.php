@@ -99,38 +99,31 @@ add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_e
 
 function oopos_start_import_products_external_sql() {
      $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
- $sql_query = "SELECT * FROM produits";
+ $sql_query = "SELECT * FROM produits;"; // <-- important semicolon
 
-    // Initialize cURL
     $ch = curl_init($api_url);
-
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $sql_query);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, trim($sql_query));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         "Accept: application/json",
         "Content-Type: text/plain",
-        "Content-Length: " . strlen($sql_query),
+        "Content-Length: " . strlen(trim($sql_query)),
     ]);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // same as sslverify => false
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-    // Execute
     $response = curl_exec($ch);
     $error = curl_error($ch);
     curl_close($ch);
+
+    $upload_dir = wp_upload_dir();
+    file_put_contents($upload_dir['basedir'] . '/oopos_debug.txt', "Sent SQL:\n$sql_query\n\nResponse:\n$response");
 
     if ($error) {
         wp_send_json_error(['message' => 'cURL error: ' . $error]);
     }
 
     $decoded = json_decode($response, true);
-
-    // Log raw data for debugging
-    $upload_dir = wp_upload_dir();
-    file_put_contents(
-        $upload_dir['basedir'] . '/oopos_debug.txt',
-        "Sent SQL:\n$sql_query\n\nResponse:\n$response"
-    );
 
     if (!$decoded || !isset($decoded['result']) || $decoded['result'] !== 'ok') {
         wp_send_json_error([
@@ -141,7 +134,6 @@ function oopos_start_import_products_external_sql() {
 
     $data = $decoded['data'];
 
-    // Save response to res.json
     $file_path = $upload_dir['basedir'] . '/res.json';
     $file_url = $upload_dir['baseurl'] . '/res.json';
     file_put_contents($file_path, wp_json_encode($data, JSON_PRETTY_PRINT));
