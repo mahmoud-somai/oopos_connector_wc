@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const step1 = form.querySelector('[data-step="1"]');
     const step2 = form.querySelector('[data-step="2"]');
+    
 
     // Create Next button but keep it hidden initially
     let nextBtn = document.createElement('button');
@@ -71,7 +72,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Step 2: Start Import button
-    startImportBtn.addEventListener('click', function() {
-        alert('Start importing products...'); // Replace with actual import AJAX logic
+startImportBtn.addEventListener('click', function() {
+    const resultDiv = document.getElementById('import-result');
+
+    resultDiv.innerHTML = `<div style="color:blue;font-weight:600;margin-top:10px;">Importing products...</div>`;
+
+    const data = new URLSearchParams();
+    data.append('action', 'oopos_start_import_products');
+
+    fetch(ooposImportAjax.ajax_url, {
+        method: 'POST',
+        body: data
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (res.success) {
+            resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">${res.data.message} <br> File saved at: <a href="${res.data.file}" target="_blank">res.json</a></div>`;
+        } else {
+            resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">${res.data.message || 'Error importing products.'}</div>`;
+        }
+    })
+    .catch(err => {
+        console.error('AJAX Error:', err);
+        resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">AJAX request failed.</div>`;
     });
+});
 });

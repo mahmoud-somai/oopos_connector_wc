@@ -87,3 +87,52 @@ function oopos_save_import_settings() {
 
     wp_send_json_success(['message' => 'Import settings saved successfully!']);
 }
+
+// Handle AJAX: Start Import Products
+add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_external');
+
+function oopos_start_import_products_external() {
+    // Replace with your real API URL
+     $api_url = 'https://api.oopos.fr/api/v2/import-produits.do/DEMO_MABOUTIQUE/124d24ff60d642035a4aff3da5a89de4';
+
+    // Get data from external API
+    $response = wp_remote_get($api_url, [
+        'timeout' => 30,
+        'headers' => [
+            'Accept' => 'application/json',
+        ],
+    ]);
+
+    if (is_wp_error($response)) {
+        wp_send_json_error(['message' => 'Failed to fetch API: ' . $response->get_error_message()]);
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+
+    if (!$data) {
+        wp_send_json_error(['message' => 'Invalid JSON response from API.']);
+    }
+
+    // Filter for magasin = 'web' and ecommerce = 1
+    $filtered = array_filter($data, function($item) {
+        return isset($item['magasin'], $item['ecommerce']) && $item['magasin'] === 'web' && $item['ecommerce'] == 1;
+    });
+
+    // Save to JSON file in uploads folder
+    $upload_dir = wp_upload_dir();
+    $file_path = $upload_dir['basedir'] . '/res.json';
+    $file_url = $upload_dir['baseurl'] . '/res.json';
+
+    $json_data = wp_json_encode(array_values($filtered), JSON_PRETTY_PRINT);
+
+    if (file_put_contents($file_path, $json_data) === false) {
+        wp_send_json_error(['message' => 'Failed to write JSON file.']);
+    }
+
+    wp_send_json_success([
+        'message' => 'Products imported successfully from external API!',
+        'file' => $file_url
+    ]);
+}
+
