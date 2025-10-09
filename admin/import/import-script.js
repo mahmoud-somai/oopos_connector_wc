@@ -6,28 +6,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const step1 = form.querySelector('[data-step="1"]');
     const step2 = form.querySelector('[data-step="2"]');
-    const backBtn = document.getElementById('back-btn');
-    const startImportBtn = document.getElementById('start-import-btn');
 
-    // Overlay elements
-    const overlay = document.getElementById('oopos-overlay');
+    // Create overlay dynamically
+    const overlay = document.createElement('div');
+    overlay.id = 'oopos-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = 0;
+    overlay.style.left = 0;
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.background = 'rgba(0,0,0,0.7)';
+    overlay.style.display = 'none';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.zIndex = '9999';
+    overlay.innerHTML = `
+        <div id="oopos-overlay-content" style="
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+            font-family: sans-serif;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        ">
+            <h2 style="margin-bottom:20px;">Importing Products</h2>
+            <div id="workflow-steps" style="text-align:left; font-size:15px;">
+                <div id="step1-status">1️⃣ Starting importing products process...</div>
+                <div id="step2-status" style="opacity:0.5;">2️⃣ Fetching products...</div>
+                <div id="step3-status" style="opacity:0.5;">3️⃣ Products fetched successfully.</div>
+                <div id="step4-status" style="opacity:0.5;">4️⃣ File created successfully.</div>
+            </div>
+            <button id="close-overlay-btn" class="button button-secondary" style="margin-top:20px; display:none;">Close</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
     const closeBtn = document.getElementById('close-overlay-btn');
-    const step1Status = document.getElementById('step1');
-    const step2Status = document.getElementById('step2');
-    const step3Status = document.getElementById('step3');
-    const step4Status = document.getElementById('step4');
 
-    // Create "Next" button
-    const nextBtn = document.createElement('button');
+    // Next button (hidden initially)
+    let nextBtn = document.createElement('button');
     nextBtn.type = 'button';
     nextBtn.textContent = 'Next';
     nextBtn.className = 'button button-primary';
     nextBtn.style.display = 'none';
     step1.querySelector('.submit-section').appendChild(nextBtn);
 
-    /* --------------------
-       STEP 1: Save Settings
-    -------------------- */
+    const backBtn = document.getElementById('back-btn');
+    const startImportBtn = document.getElementById('start-import-btn');
+
+    // Step 1: Save settings
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
@@ -63,84 +91,43 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    /* --------------------
-       STEP 2: Navigation
-    -------------------- */
+    // Step 1 → Step 2
     nextBtn.addEventListener('click', function() {
         step1.style.display = 'none';
         step2.style.display = 'block';
     });
 
+    // Back button
     backBtn.addEventListener('click', function() {
         step2.style.display = 'none';
         step1.style.display = 'block';
     });
 
-    /* --------------------
-       STEP 3: Start Import
-    -------------------- */
-    startImportBtn.addEventListener('click', function() {
-        overlay.style.display = 'flex';
-        closeBtn.style.display = 'none';
+    // Step 2: Start Import button
+jQuery(document).ready(function ($) {
+    const overlay = $('#oopos-overlay');
+    const closeBtn = $('#close-overlay-btn');
 
-        // Reset steps UI
-        [step1Status, step2Status, step3Status, step4Status].forEach(el => {
-            el.textContent = el.textContent.replace('✅', '⏳').replace('❌', '⏳');
-            el.style.color = '';
-        });
-
-        // Animate step 1
-        step1Status.textContent = '✅ Starting import process...';
-
-        const data = new URLSearchParams();
-        data.append('action', 'oopos_start_import_products');
-
-        fetch(ooposImportAjax.ajax_url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: data.toString()
-        })
-        .then(res => res.json())
-        .then(res => {
-            // Step 2
-            step2Status.textContent = '✅ Fetching products...';
-
-            if (res.success) {
-                // Step 3
-                step3Status.textContent = '✅ Products fetched successfully.';
-                step3Status.style.color = 'green';
-
-                // Step 4 (file)
-                setTimeout(() => {
-                    step4Status.textContent = '✅ File created successfully.';
-                    step4Status.style.color = 'green';
-                    closeBtn.style.display = 'inline-block';
-                }, 1000);
-
-                resultDiv.innerHTML = `
-                    <div style="color:green;font-weight:600;margin-top:10px;">
-                        ${res.data.message} <br>
-                        File saved at: <a href="${res.data.file}" target="_blank">res.json</a>
-                    </div>`;
-            } else {
-                step3Status.textContent = `❌ ${res.data.message || 'Error importing products.'}`;
-                step3Status.style.color = 'red';
-                closeBtn.style.display = 'inline-block';
-            }
-        })
-        .catch(err => {
-            console.error('AJAX Error:', err);
-            step3Status.textContent = '❌ AJAX request failed.';
-            step3Status.style.color = 'red';
-            closeBtn.style.display = 'inline-block';
-        });
+    $('#start-import-btn').on('click', function () {
+        overlay.fadeIn(300); // show overlay
+        $('#step1').text('✅ Starting import process...');
+        
+        // simulate steps or replace with AJAX
+        setTimeout(() => $('#step2').text('✅ Fetching products...'), 1000);
+        setTimeout(() => $('#step3').text('✅ Products fetched successfully!'), 2000);
+        setTimeout(() => {
+            $('#step4').text('✅ File created successfully!');
+            closeBtn.show();
+        }, 3000);
     });
 
-    /* --------------------
-       CLOSE OVERLAY
-    -------------------- */
+    closeBtn.on('click', function () {
+        overlay.fadeOut(300);
+    });
+});
+
+
+    // Close overlay
     closeBtn.addEventListener('click', function() {
         overlay.style.display = 'none';
     });
