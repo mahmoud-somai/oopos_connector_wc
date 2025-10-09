@@ -109,16 +109,16 @@ function oopos_start_import_products_external_sql() {
         wp_send_json_error(['message' => 'Connector data is missing or invalid.']);
     }
 
-    // ✅ Clean up potential extra quotes or slashes
+    //  Clean up potential extra quotes or slashes
     $domain   = rtrim(trim($connector_data['domain'], "'\"/"), '/') . '/';
     $enseigne = trim($connector_data['enseigne'], "'\"");
     $api_key  = trim($connector_data['api_key'], "'\"");
 
-    // ✅ Build the dynamic API URL
+    //  Build the dynamic API URL
     $api_url = $domain . 'api/v2/query.do?enseigne=' . urlencode($enseigne) . '&api-key=' . urlencode($api_key);
     $sql_query = trim("SELECT * FROM produits WHERE ecommerce=1;");
 
-    // ✅ Prepare request arguments
+    //  Prepare request arguments
     $args = [
         'method'  => 'PUT',
         'headers' => [
