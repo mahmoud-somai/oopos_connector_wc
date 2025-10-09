@@ -91,58 +91,45 @@ function oopos_save_import_settings() {
 // Handle AJAX: Start Import Products
 add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_external_sql');
 
-function oopos_start_import_products_external() {
-    // External API URL that returns all products
+function oopos_start_import_products_external_sql() {
+    // The external API endpoint that can execute SQL queries
     $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
 
-    // Make GET request to the API
-    $response = wp_remote_get($api_url, [
-        'timeout' => 60,
-        'headers' => [
-            'Accept' => 'application/json',
-        ],
-    ]);
+$response = wp_remote_get($api_url, [
+    'timeout' => 60,
+    'headers' => ['Accept' => 'application/json'],
+]);
 
-    // Check for errors
-    if (is_wp_error($response)) {
-        wp_send_json_error([
-            'message' => 'Failed to fetch API: ' . $response->get_error_message()
-        ]);
-    }
-
-    $body = wp_remote_retrieve_body($response);
-    $json = json_decode($body, true);
-
-    // Validate response
-    if (!$json || !isset($json['data'])) {
-        wp_send_json_error([
-            'message' => 'Invalid API response.'
-        ]);
-    }
-
-    // THIS IS THE EQUIVALENT OF SELECT * FROM produits
-    $all_products = $json['data'];
-
-    // Save the response to res.json in WordPress uploads folder
-    $upload_dir = wp_upload_dir();
-    $file_path = $upload_dir['basedir'] . '/res.json';
-    $file_url = $upload_dir['baseurl'] . '/res.json';
-
-    $json_data = wp_json_encode($all_products, JSON_PRETTY_PRINT);
-
-    if (file_put_contents($file_path, $json_data) === false) {
-        wp_send_json_error([
-            'message' => 'Failed to write JSON file.'
-        ]);
-    }
-
-    // Success response
-    wp_send_json_success([
-        'message' => 'All products fetched and saved successfully!',
-        'file' => $file_url
-    ]);
+if (is_wp_error($response)) {
+    wp_send_json_error(['message' => 'Failed to fetch API: ' . $response->get_error_message()]);
 }
 
+$body = wp_remote_retrieve_body($response);
+$json = json_decode($body, true);
+
+if (!$json || !isset($json['data'])) {
+    wp_send_json_error(['message' => 'Invalid API response.']);
+}
+
+// This is equivalent to SELECT * FROM produits
+$data = $json['data'];
+
+// Save to res.json
+$upload_dir = wp_upload_dir();
+$file_path = $upload_dir['basedir'] . '/res.json';
+$file_url = $upload_dir['baseurl'] . '/res.json';
+
+$json_data = wp_json_encode($data, JSON_PRETTY_PRINT);
+
+if (file_put_contents($file_path, $json_data) === false) {
+    wp_send_json_error(['message' => 'Failed to write JSON file.']);
+}
+
+wp_send_json_success([
+    'message' => 'All products fetched and saved successfully!',
+    'file' => $file_url
+]);
+}
 
 
 
