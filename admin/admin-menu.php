@@ -310,10 +310,11 @@ function oopos_save_import_settings() {
     update_option('oopos_empty_values', $empty_values_bool);
 
     wp_send_json_success(['message' => 'Import settings saved successfully!']);
-}
-var_dump(get_option('oopos_skip_new_product'));
+    var_dump(get_option('oopos_skip_new_product'));
 var_dump(get_option('oopos_existing_products'));
 var_dump(get_option('oopos_empty_values'))
+}
+
 
 }
 
