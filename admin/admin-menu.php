@@ -288,9 +288,7 @@ function oopos_save_extra_attributes() {
 // AJAX: Save Import Settings
 // ==========================
 
-/// Enqueue scripts and styles for the import page
-add_action('admin_enqueue_scripts', 'oopos_enqueue_admin_scripts');
-function oopos_enqueue_admin_scripts($hook) {
+
     $screen = get_current_screen();
     if ($screen->id !== 'oopos-connector_page_oopos-connector-import') return;
     
