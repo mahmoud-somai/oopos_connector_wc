@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const step1 = form.querySelector('[data-step="1"]');
     const step2 = form.querySelector('[data-step="2"]');
+
+    const overlay = document.getElementById('oopos-overlay');
+    const closeBtn = document.getElementById('close-overlay-btn');
     
 
     // Create Next button but keep it hidden initially
@@ -72,41 +75,60 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Step 2: Start Import button
-startImportBtn.addEventListener('click', function() {
-    const resultDiv = document.getElementById('import-result');
+startImportBtn?.addEventListener('click', async () => {
+        overlay.style.display = 'flex';
+        closeBtn.style.display = 'none';
+        Object.values(steps).forEach(s => { s.classList.remove('done', 'error'); s.textContent = s.textContent.replace('✅', '⏳'); });
 
-    resultDiv.innerHTML = `<div style="color:blue;font-weight:600;margin-top:10px;">Importing products...</div>`;
+        // Step 1
+        steps.step1.textContent = '✅ Starting import process...';
+        steps.step1.classList.add('done');
 
-    // Use FormData or URLSearchParams
-    const data = new URLSearchParams();
-    data.append('action', 'oopos_start_import_products');
+        try {
+            // Step 2
+            steps.step2.textContent = '⏳ Fetching products from OOPOS...';
+            const formData = new URLSearchParams();
+            formData.append('action', 'oopos_start_import_products');
 
-    fetch(ooposImportAjax.ajax_url, {
-        method: 'POST', // change GET → POST
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded', // required for URLSearchParams
-        },
-        body: data.toString()
-    })
-    .then(res => res.json())
-    .then(res => {
-        if (res.success) {
+            const response = await fetch(ajaxurl, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            // Step 3
+            if (!result.success) {
+                steps.step3.textContent = '❌ Error fetching products.';
+                steps.step3.classList.add('error');
+                throw new Error(result.data?.message || 'Unknown error');
+            }
+
+            steps.step2.textContent = '✅ Products fetched successfully.';
+            steps.step2.classList.add('done');
+
+            steps.step3.textContent = '✅ Products fetched with success.';
+            steps.step3.classList.add('done');
+
+            // Step 4
+            steps.step4.textContent = '✅ File created successfully!';
+            steps.step4.classList.add('done');
+
+            closeBtn.style.display = 'inline-block';
             resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">
-                ${res.data.message} <br> 
-                File saved at: <a href="${res.data.file}" target="_blank">res.json</a>
+                ${result.data.message}<br>
+                File saved at: <a href="${result.data.file}" target="_blank">res.json</a>
             </div>`;
-        } else {
-            resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">
-                ${res.data.message || 'Error importing products.'}
-            </div>`;
+        } catch (error) {
+            console.error(error);
+            steps.step4.textContent = '❌ Import process failed.';
+            steps.step4.classList.add('error');
+            closeBtn.style.display = 'inline-block';
         }
-    })
-    .catch(err => {
-        console.error('AJAX Error:', err);
-        resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">
-            AJAX request failed.
-        </div>`;
     });
-});
+
+    closeBtn?.addEventListener('click', () => {
+        overlay.style.display = 'none';
+    });
 
 });

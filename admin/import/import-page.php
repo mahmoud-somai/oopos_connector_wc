@@ -5,7 +5,6 @@ if (!defined('ABSPATH')) exit;
 $skip_new_product = (bool) get_option('oopos_skip_new_product', false);
 $existing_products = (bool) get_option('oopos_existing_products', false);
 $empty_values = (bool) get_option('oopos_empty_values', false);
-
 ?>
 
 <div class="wrap import-wrapper">
@@ -18,7 +17,6 @@ $empty_values = (bool) get_option('oopos_empty_values', false);
 
             <!-- Step 1 -->
             <div class="form-step" data-step="1">
-                <!-- Skip Import of New Products -->
                 <div class="form-section">
                     <label class="section-label">Skip import of new products:</label>
                     <div class="options-row">
@@ -27,7 +25,6 @@ $empty_values = (bool) get_option('oopos_empty_values', false);
                     </div>
                 </div>
 
-                <!-- Product Already Imported -->
                 <div class="form-section">
                     <label class="section-label">Product imported already:</label>
                     <div class="options-row">
@@ -36,7 +33,6 @@ $empty_values = (bool) get_option('oopos_empty_values', false);
                     </div>
                 </div>
 
-                <!-- Product Contains Empty Values -->
                 <div class="form-section">
                     <label class="section-label">Product contains empty values:</label>
                     <div class="options-row">
@@ -50,16 +46,29 @@ $empty_values = (bool) get_option('oopos_empty_values', false);
                 </div>
             </div>
 
-            <!-- Step 2 (hidden by default) -->
+            <!-- Step 2 -->
             <div class="form-step" data-step="2" style="display:none;">
                 <div class="submit-section">
                     <button type="button" class="button button-secondary" id="back-btn">Back</button>
                     <button type="button" class="button button-primary" id="start-import-btn">Start Import Products</button>
                 </div>
             </div>
-
         </form>
 
         <div id="import-result"></div>
+    </div>
+</div>
+
+<!-- ✅ Overlay (Hidden by default) -->
+<div id="oopos-overlay">
+    <div class="oopos-overlay-content">
+        <h2>Importing Products...</h2>
+        <ul id="oopos-progress-list">
+            <li id="step1">⏳ Starting import process...</li>
+            <li id="step2">⏳ Fetching products...</li>
+            <li id="step3">⏳ Waiting for products fetch success...</li>
+            <li id="step4">⏳ Waiting for file creation...</li>
+        </ul>
+        <button id="close-overlay-btn" style="display:none;" class="button button-primary">Close</button>
     </div>
 </div>
