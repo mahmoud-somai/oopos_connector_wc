@@ -290,32 +290,42 @@ function oopos_save_extra_attributes() {
 
 // Enqueue styles/scripts for the import page
 add_action('admin_enqueue_scripts', 'oopos_enqueue_admin_scripts');
-function oopos_enqueue_admin_scripts($hook) {
-    $screen = function_exists('get_current_screen') ? get_current_screen() : null;
-    if (!$screen) return;
 
-    if ($screen->id === 'oopos-connector_page_oopos-connector-import') {
-        wp_enqueue_script(
-            'oopos-import-script',
-            plugin_dir_url(__FILE__) . 'import/import-script.js',
-            array('jquery'),
-            '1.0',
-            true
-        );
-    }
+function oopos_enqueue_admin_scripts($hook) {
+    // Only enqueue on our plugin page
+    if ($hook !== 'toplevel_page_oopos-connector') return; 
+
+    wp_enqueue_style(
+        'oopos-import-style',
+        plugin_dir_url(__FILE__) . 'import/import-style.css',
+        [],
+        '1.0'
+    );
+
+    wp_enqueue_script(
+        'oopos-import-script',
+        plugin_dir_url(__FILE__) . 'import/import-script.js',
+        [],
+        '1.0',
+        true
+    );
+
+    wp_localize_script('oopos-import-script', 'ooposImportAjax', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('oopos_import_nonce')
+    ]);
 }
 
 
 add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
+
 function oopos_save_import_settings() {
     check_ajax_referer('oopos_import_nonce', '_wpnonce');
 
-    // Get posted form values
-    $skip_new = ($_POST['skip_new_products'] ?? 'no') === 'yes';
-    $existing_update = ($_POST['existing_products'] ?? 'skip') === 'update';
-    $empty_update = ($_POST['empty_values'] ?? 'skip') === 'update';
+    $skip_new = filter_var($_POST['oopos_skip_new_product'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    $existing_update = filter_var($_POST['oopos_existing_products'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    $empty_update = filter_var($_POST['oopos_empty_values'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
-    // Save options
     update_option('oopos_skip_new_product', $skip_new);
     update_option('oopos_existing_products', $existing_update);
     update_option('oopos_empty_values', $empty_update);
