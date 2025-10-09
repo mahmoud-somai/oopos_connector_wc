@@ -299,15 +299,10 @@ add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
 function oopos_save_import_settings() {
     check_ajax_referer('oopos_import_nonce', '_wpnonce');
 
-    // Get values
-    $skip_new_products = sanitize_text_field($_POST['skip_new_products'] ?? 'no');
-    $existing_products = sanitize_text_field($_POST['existing_products'] ?? 'skip');
-    $empty_values = sanitize_text_field($_POST['empty_values'] ?? 'skip');
-
-    // Convert to boolean
-    $skip_new_products_bool = ($skip_new_products === 'yes');
-    $existing_products_bool = ($existing_products === 'update');
-    $empty_values_bool = ($empty_values === 'update');
+    // Get boolean values directly from JS (true/false as strings)
+    $skip_new_products_bool = filter_var($_POST['oopos_skip_new_product'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    $existing_products_bool = filter_var($_POST['oopos_existing_products'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    $empty_values_bool = filter_var($_POST['oopos_empty_values'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
     // Save in WordPress options
     update_option('oopos_skip_new_product', $skip_new_products_bool);
@@ -316,6 +311,9 @@ function oopos_save_import_settings() {
 
     wp_send_json_success(['message' => 'Import settings saved successfully!']);
 }
+var_dump(get_option('oopos_skip_new_product'));
+var_dump(get_option('oopos_existing_products'));
+var_dump(get_option('oopos_empty_values'))
 
 }
 
