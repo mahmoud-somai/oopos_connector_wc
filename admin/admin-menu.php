@@ -282,6 +282,22 @@ function oopos_save_extra_attributes() {
     }
 
     wp_send_json_success(['message' => 'Extra attributes saved successfully']);
+
+
+    // ==========================
+// AJAX: Save Import Settings
+// ==========================
+add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
+function oopos_save_import_settings() {
+    check_ajax_referer('oopos_import_nonce', '_wpnonce');
+
+    $skip_new_products = sanitize_text_field($_POST['skip_new_products'] ?? 'no');
+    $skip_new_products_bool = ($skip_new_products === 'yes') ? true : false;
+
+    update_option('oopos_skip_new_product', $skip_new_products_bool);
+
+    wp_send_json_success(['message' => 'Import settings saved successfully!']);
+}
 }
 
 

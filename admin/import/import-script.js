@@ -1,34 +1,24 @@
-jQuery(document).ready(function($) {
-    $('#oopos-import-form').on('submit', function(e) {
+jQuery(document).ready(function ($) {
+    $('#oopos-import-form').on('submit', function (e) {
         e.preventDefault();
 
-        const fileInput = $('#import-file')[0];
-        if (!fileInput.files.length) {
-            alert('Please select a file to import.');
-            return;
-        }
+        const formData = $(this).serialize();
 
-        const formData = new FormData();
-        formData.append('action', 'oopos_handle_import');
-        formData.append('import_file', fileInput.files[0]);
-        formData.append('_wpnonce', wt_iew_ajax.nonce);
-
-        $.ajax({
-            url: wt_iew_ajax.ajax_url,
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                if (response.success) {
-                    $('#import-result').html('<p style="color:green;">' + response.data.message + '</p>');
-                } else {
-                    $('#import-result').html('<p style="color:red;">' + response.data.message + '</p>');
-                }
-            },
-            error: function() {
-                alert('AJAX error. Please check console.');
+        $.post(ajaxurl, formData, function (response) {
+            if (response.success) {
+                $('#import-result').html(
+                    `<div style="color:green;font-weight:600;">${response.data.message}</div>`
+                );
+            } else {
+                $('#import-result').html(
+                    `<div style="color:red;font-weight:600;">${response.data.message || 'Error saving settings.'}</div>`
+                );
             }
+        }).fail(function (xhr) {
+            console.error('AJAX Error:', xhr);
+            $('#import-result').html(
+                `<div style="color:red;font-weight:600;">AJAX request failed. Check console.</div>`
+            );
         });
     });
 });
