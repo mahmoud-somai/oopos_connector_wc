@@ -98,35 +98,34 @@ function oopos_save_import_settings() {
 add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_external_sql');
 
 function oopos_start_import_products_external_sql() {
-    $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
+     $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
+    // ✅ SQL clair et sans caractères parasites
+    $sql_query = "SELECT * FROM produits";
 
-      $sql_query = "SELECT * FROM produits;";
-
-    // ✅ Headers attendus par OOPOS
     $headers = [
         'Accept' => 'application/json',
-        'Content-Type' => 'text/plain',
+        'Content-Type' => 'text/plain; charset=utf-8',
     ];
 
-    // ✅ Faire une requête PUT (WordPress ne le fait pas par défaut avec wp_remote_post)
+    // ✅ Forcer WordPress à ne RIEN encoder, ni transformer
     $response = wp_remote_request($api_url, [
-        'method'  => 'PUT',
-        'timeout' => 60,
-        'headers' => $headers,
-        'body'    => $sql_query,
-        'sslverify' => false, // équivalent de Unirest::verifyPeer(false)
+        'method'    => 'PUT',
+        'timeout'   => 60,
+        'headers'   => $headers,
+        'body'      => $sql_query, // texte brut
+        'sslverify' => false,
+        'blocking'  => true,
+        'data_format' => 'body'
     ]);
 
-    // ✅ Vérifier erreurs réseau
     if (is_wp_error($response)) {
         wp_send_json_error(['message' => 'Failed to reach API: ' . $response->get_error_message()]);
     }
 
-    // ✅ Décoder le corps de la réponse
     $body = wp_remote_retrieve_body($response);
     $json = json_decode($body, true);
 
-    // ✅ Vérifier le format
+    // ✅ Si OOPOS renvoie une erreur SQL, on la remonte telle quelle
     if (!$json || !isset($json['result']) || $json['result'] !== 'ok') {
         wp_send_json_error([
             'message' => 'Invalid API response.',
@@ -136,7 +135,7 @@ function oopos_start_import_products_external_sql() {
 
     $data = $json['data'];
 
-    // ✅ Sauvegarder le fichier dans /uploads
+    // ✅ Sauvegarde JSON
     $upload_dir = wp_upload_dir();
     $file_path = $upload_dir['basedir'] . '/res.json';
     $file_url = $upload_dir['baseurl'] . '/res.json';
@@ -148,7 +147,7 @@ function oopos_start_import_products_external_sql() {
     }
 
     wp_send_json_success([
-        'message' => 'Products fetched and saved successfully!',
+        'message' => 'Products fetched successfully!',
         'file' => $file_url
     ]);
 }
