@@ -108,10 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
             step2Status.textContent = '✅ Fetching products...';
 
             if (res.success) {
-                // Step 3
-                step3Status.textContent = '✅ Products fetched successfully.';
-                step3Status.style.color = 'green';
-
                 // Step 4 (file)
                 setTimeout(() => {
                     step4Status.textContent = '✅ File created successfully.';
@@ -132,8 +128,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(err => {
             console.error('AJAX Error:', err);
-            step3Status.textContent = '❌ AJAX request failed.';
-            step3Status.style.color = 'red';
             closeBtn.style.display = 'inline-block';
         });
     });
