@@ -305,14 +305,8 @@ add_action('admin_enqueue_scripts', function($hook) {
             '1.0'
         );
 
-        // JS (vanilla)
-        wp_enqueue_script(
-            'oopos-import-script',
-            plugin_dir_url(__FILE__) . './import/import-script.js',
-            [],
-            '1.0',
-            true
-        );
+        //js
+        wp_enqueue_script('oopos-import-script', plugin_dir_url(__FILE__) . './import/import-script.js', array('jquery'), false, true);
 
         // Localize AJAX data
         wp_localize_script('oopos-import-script', 'ooposImportAjax', [
