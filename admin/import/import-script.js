@@ -7,16 +7,49 @@ document.addEventListener('DOMContentLoaded', function() {
     const step1 = form.querySelector('[data-step="1"]');
     const step2 = form.querySelector('[data-step="2"]');
 
-    const overlay = document.getElementById('oopos-overlay');
-    const closeBtn = document.getElementById('close-overlay-btn');
-    
+    // Create overlay dynamically
+    const overlay = document.createElement('div');
+    overlay.id = 'oopos-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = 0;
+    overlay.style.left = 0;
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.background = 'rgba(0,0,0,0.7)';
+    overlay.style.display = 'none';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.zIndex = '9999';
+    overlay.innerHTML = `
+        <div id="oopos-overlay-content" style="
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+            font-family: sans-serif;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        ">
+            <h2 style="margin-bottom:20px;">Importing Products</h2>
+            <div id="workflow-steps" style="text-align:left; font-size:15px;">
+                <div id="step1-status">1️⃣ Starting importing products process...</div>
+                <div id="step2-status" style="opacity:0.5;">2️⃣ Fetching products...</div>
+                <div id="step3-status" style="opacity:0.5;">3️⃣ Products fetched successfully.</div>
+                <div id="step4-status" style="opacity:0.5;">4️⃣ File created successfully.</div>
+            </div>
+            <button id="close-overlay-btn" class="button button-secondary" style="margin-top:20px; display:none;">Close</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
 
-    // Create Next button but keep it hidden initially
+    const closeBtn = document.getElementById('close-overlay-btn');
+
+    // Next button (hidden initially)
     let nextBtn = document.createElement('button');
     nextBtn.type = 'button';
     nextBtn.textContent = 'Next';
     nextBtn.className = 'button button-primary';
-    nextBtn.style.display = 'none'; // hidden at start
+    nextBtn.style.display = 'none';
     step1.querySelector('.submit-section').appendChild(nextBtn);
 
     const backBtn = document.getElementById('back-btn');
@@ -38,8 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
         data.append('oopos_existing_products', existingProducts);
         data.append('oopos_empty_values', emptyValues);
 
-        console.log('Sending AJAX data:', {skipNewProducts, existingProducts, emptyValues, nonce});
-
         fetch(ooposImportAjax.ajax_url, {
             method: 'POST',
             body: data
@@ -49,8 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (res.success) {
                 resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">${res.data.message}</div>`;
                 setTimeout(() => { resultDiv.innerHTML = ''; }, 3000);
-
-                // Show Next button after saving
                 nextBtn.style.display = 'inline-block';
             } else {
                 resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">${res.data.message || 'Error saving settings.'}</div>`;
@@ -62,73 +91,73 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Step 1: Next button click → show Step 2
+    // Step 1 → Step 2
     nextBtn.addEventListener('click', function() {
         step1.style.display = 'none';
         step2.style.display = 'block';
     });
 
-    // Step 2: Back button
+    // Back button
     backBtn.addEventListener('click', function() {
         step2.style.display = 'none';
         step1.style.display = 'block';
     });
 
     // Step 2: Start Import button
-startImportBtn?.addEventListener('click', async () => {
+    startImportBtn.addEventListener('click', function() {
+        // Show overlay
         overlay.style.display = 'flex';
         closeBtn.style.display = 'none';
-        Object.values(steps).forEach(s => { s.classList.remove('done', 'error'); s.textContent = s.textContent.replace('✅', '⏳'); });
+        document.getElementById('step1-status').style.opacity = '1';
+        document.getElementById('step2-status').style.opacity = '0.5';
+        document.getElementById('step3-status').style.opacity = '0.5';
+        document.getElementById('step4-status').style.opacity = '0.5';
 
-        // Step 1
-        steps.step1.textContent = '✅ Starting import process...';
-        steps.step1.classList.add('done');
+        // Step 1 animation
+        setTimeout(() => {
+            document.getElementById('step2-status').style.opacity = '1';
+        }, 1000);
 
-        try {
-            // Step 2
-            steps.step2.textContent = '⏳ Fetching products from OOPOS...';
-            const formData = new URLSearchParams();
-            formData.append('action', 'oopos_start_import_products');
+        const data = new URLSearchParams();
+        data.append('action', 'oopos_start_import_products');
 
-            const response = await fetch(ajaxurl, {
-                method: 'POST',
-                body: formData
-            });
+        fetch(ooposImportAjax.ajax_url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: data.toString()
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                // Step 3 success
+                document.getElementById('step3-status').style.opacity = '1';
 
-            const result = await response.json();
+                // Step 4: file created
+                setTimeout(() => {
+                    document.getElementById('step4-status').style.opacity = '1';
+                    closeBtn.style.display = 'inline-block';
+                }, 1000);
 
-            // Step 3
-            if (!result.success) {
-                steps.step3.textContent = '❌ Error fetching products.';
-                steps.step3.classList.add('error');
-                throw new Error(result.data?.message || 'Unknown error');
+                resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">
+                    ${res.data.message} <br>
+                    File saved at: <a href="${res.data.file}" target="_blank">res.json</a>
+                </div>`;
+            } else {
+                document.getElementById('workflow-steps').innerHTML += `<div style="color:red;margin-top:10px;">❌ ${res.data.message || 'Error importing products.'}</div>`;
+                closeBtn.style.display = 'inline-block';
             }
-
-            steps.step2.textContent = '✅ Products fetched successfully.';
-            steps.step2.classList.add('done');
-
-            steps.step3.textContent = '✅ Products fetched with success.';
-            steps.step3.classList.add('done');
-
-            // Step 4
-            steps.step4.textContent = '✅ File created successfully!';
-            steps.step4.classList.add('done');
-
+        })
+        .catch(err => {
+            console.error('AJAX Error:', err);
+            document.getElementById('workflow-steps').innerHTML += `<div style="color:red;margin-top:10px;">❌ AJAX request failed.</div>`;
             closeBtn.style.display = 'inline-block';
-            resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">
-                ${result.data.message}<br>
-                File saved at: <a href="${result.data.file}" target="_blank">res.json</a>
-            </div>`;
-        } catch (error) {
-            console.error(error);
-            steps.step4.textContent = '❌ Import process failed.';
-            steps.step4.classList.add('error');
-            closeBtn.style.display = 'inline-block';
-        }
+        });
     });
 
-    closeBtn?.addEventListener('click', () => {
+    // Close overlay
+    closeBtn.addEventListener('click', function() {
         overlay.style.display = 'none';
     });
-
 });
