@@ -97,14 +97,7 @@ function oopos_start_import_products_external_sql() {
 
     // Your SQL query
     $sql_query = "
-        SELECT
-            Produit,
-            Designation,
-            Saison,
-            Rayon,
-            Famille,
-            SousFamille,
-            Marque,
+        SELECT Produit, Designation, Saison, Rayon, Famille, SousFamille, Marque, Collection, Rayon, Famille, SousFamille, Marque,
             Collection,
             Modele,
             Matiere,
