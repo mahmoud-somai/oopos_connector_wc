@@ -99,7 +99,7 @@ add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_e
 
 function oopos_start_import_products_external_sql() {
    $connector_data = get_option('oopos_connector_data');
-   $connector_selected_data=get_option('oopos-shops-selected')
+   $connector_selected_data=get_option('oopos-shops-selected');
 
     if (
         !is_array($connector_data) ||
