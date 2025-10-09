@@ -100,45 +100,55 @@ add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_e
 function oopos_start_import_products_external_sql() {
     $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
 
-    // The raw SQL query
-    $sql_query = "SELECT * FROM produits";
+      $sql_query = "SELECT * FROM produits;";
 
-    // Send POST request with raw SQL in body
-    $response = wp_remote_post($api_url, [
+    // ✅ Headers attendus par OOPOS
+    $headers = [
+        'Accept' => 'application/json',
+        'Content-Type' => 'text/plain',
+    ];
+
+    // ✅ Faire une requête PUT (WordPress ne le fait pas par défaut avec wp_remote_post)
+    $response = wp_remote_request($api_url, [
+        'method'  => 'PUT',
         'timeout' => 60,
-        'headers' => [
-            'Accept' => 'application/json',
-            'Content-Type' => 'text/plain', // matches what Postman does with raw text
-        ],
-        'body' => $sql_query,
+        'headers' => $headers,
+        'body'    => $sql_query,
+        'sslverify' => false, // équivalent de Unirest::verifyPeer(false)
     ]);
 
+    // ✅ Vérifier erreurs réseau
     if (is_wp_error($response)) {
-        wp_send_json_error(['message' => 'Failed to fetch API: ' . $response->get_error_message()]);
+        wp_send_json_error(['message' => 'Failed to reach API: ' . $response->get_error_message()]);
     }
 
+    // ✅ Décoder le corps de la réponse
     $body = wp_remote_retrieve_body($response);
     $json = json_decode($body, true);
 
-    if (!$json || !isset($json['data'])) {
-        wp_send_json_error(['message' => 'Invalid API response.']);
+    // ✅ Vérifier le format
+    if (!$json || !isset($json['result']) || $json['result'] !== 'ok') {
+        wp_send_json_error([
+            'message' => 'Invalid API response.',
+            'raw' => $body
+        ]);
     }
 
     $data = $json['data'];
 
-    // Save to res.json
+    // ✅ Sauvegarder le fichier dans /uploads
     $upload_dir = wp_upload_dir();
     $file_path = $upload_dir['basedir'] . '/res.json';
     $file_url = $upload_dir['baseurl'] . '/res.json';
 
-    $json_data = wp_json_encode($data, JSON_PRETTY_PRINT);
+    $json_data = wp_json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
     if (file_put_contents($file_path, $json_data) === false) {
         wp_send_json_error(['message' => 'Failed to write JSON file.']);
     }
 
     wp_send_json_success([
-        'message' => 'All products fetched and saved successfully!',
+        'message' => 'Products fetched and saved successfully!',
         'file' => $file_url
     ]);
 }
