@@ -12,7 +12,6 @@ $empty_values = (bool) get_option('oopos_empty_values', false);
 
     <div class="oopos-import-card">
         <form id="oopos-import-form">
-
             <?php wp_nonce_field('oopos_import_nonce', '_wpnonce'); ?>
 
             <!-- Step 1 -->
@@ -59,12 +58,12 @@ $empty_values = (bool) get_option('oopos_empty_values', false);
     </div>
 </div>
 
-<!-- ✅ Overlay (Hidden by default) -->
-<div id="oopos-overlay">
+<!-- ✅ Overlay -->
+<div id="oopos-overlay" style="display:none;">
     <div class="oopos-overlay-content">
         <h2>Importing Products...</h2>
         <ul id="oopos-progress-list">
-           <li id="step1">⏳ Starting import process...</li>
+            <li id="step1">⏳ Starting import process...</li>
             <li id="step2">⏳ Fetching products...</li>
             <li id="step3">⏳ Waiting for file creation...</li>
         </ul>

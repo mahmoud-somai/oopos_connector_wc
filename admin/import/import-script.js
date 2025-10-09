@@ -1,72 +1,26 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('oopos-import-form');
-    const resultDiv = document.getElementById('import-result');
-
     if (!form) return;
 
     const step1 = form.querySelector('[data-step="1"]');
     const step2 = form.querySelector('[data-step="2"]');
+    const backBtn = document.getElementById('back-btn');
+    const startImportBtn = document.getElementById('start-import-btn');
+    const resultDiv = document.getElementById('import-result');
 
-        // Overlay steps
+    const overlay = document.getElementById('oopos-overlay');
+    const closeBtn = document.getElementById('close-overlay-btn');
     const step1Status = document.getElementById('step1');
     const step2Status = document.getElementById('step2');
     const step3Status = document.getElementById('step3');
 
-    // Create overlay dynamically
-    const overlay = document.createElement('div');
-    overlay.id = 'oopos-overlay';
-    overlay.style.position = 'fixed';
-    overlay.style.top = 0;
-    overlay.style.left = 0;
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.background = 'rgba(0,0,0,0.7)';
-    overlay.style.display = 'none';
-    overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-    overlay.style.zIndex = '9999';
-    overlay.innerHTML = `
-        <div id="oopos-overlay-content" style="
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            width: 400px;
-            text-align: center;
-            font-family: sans-serif;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        ">
-            <h2 style="margin-bottom:20px;">Importing Products</h2>
-            <div id="workflow-steps" style="text-align:left; font-size:15px;">
-                <div id="step1-status">1️⃣ Starting importing products process...</div>
-                <div id="step2-status" style="opacity:0.5;">2️⃣ Fetching products...</div>
-                <div id="step3-status" style="opacity:0.5;">3️⃣ Products fetched successfully.</div>
-                <div id="step4-status" style="opacity:0.5;">4️⃣ File created successfully.</div>
-            </div>
-            <button id="close-overlay-btn" class="button button-secondary" style="margin-top:20px; display:none;">Close</button>
-        </div>
-    `;
-    document.body.appendChild(overlay);
-
-    const closeBtn = document.getElementById('close-overlay-btn');
-
-    // Next button (hidden initially)
-    let nextBtn = document.createElement('button');
-    nextBtn.type = 'button';
-    nextBtn.textContent = 'Next';
-    nextBtn.className = 'button button-primary';
-    nextBtn.style.display = 'none';
-    step1.querySelector('.submit-section').appendChild(nextBtn);
-
-    const backBtn = document.getElementById('back-btn');
-    const startImportBtn = document.getElementById('start-import-btn');
-
-    // Step 1: Save settings
+    // ✅ Step 1 → Save Settings
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const skipNewProducts = (document.querySelector('input[name="skip_new_products"]:checked')?.value === 'yes') || false;
-        const existingProducts = (document.querySelector('input[name="existing_products"]:checked')?.value === 'update') || false;
-        const emptyValues = (document.querySelector('input[name="empty_values"]:checked')?.value === 'update') || false;
+        const skipNewProducts = (document.querySelector('input[name="skip_new_products"]:checked')?.value === 'yes');
+        const existingProducts = (document.querySelector('input[name="existing_products"]:checked')?.value === 'update');
+        const emptyValues = (document.querySelector('input[name="empty_values"]:checked')?.value === 'update');
         const nonce = document.querySelector('input[name="_wpnonce"]').value;
 
         const data = new URLSearchParams();
@@ -76,104 +30,49 @@ document.addEventListener('DOMContentLoaded', function() {
         data.append('oopos_existing_products', existingProducts);
         data.append('oopos_empty_values', emptyValues);
 
-        fetch(ooposImportAjax.ajax_url, {
-            method: 'POST',
-            body: data
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.success) {
-                resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">${res.data.message}</div>`;
-                setTimeout(() => { resultDiv.innerHTML = ''; }, 3000);
-                nextBtn.style.display = 'inline-block';
-            } else {
-                resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">${res.data.message || 'Error saving settings.'}</div>`;
-            }
-        })
-        .catch(err => {
-            console.error('AJAX Error:', err);
-            resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">AJAX request failed.</div>`;
-        });
-    });
-
-    // Step 1 → Step 2
-    nextBtn.addEventListener('click', function() {
-        step1.style.display = 'none';
-        step2.style.display = 'block';
+        fetch(ooposImportAjax.ajax_url, { method: 'POST', body: data })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    resultDiv.innerHTML = `<div style="color:green;">${res.data.message}</div>`;
+                    setTimeout(() => resultDiv.innerHTML = '', 2000);
+                    step1.style.display = 'none';
+                    step2.style.display = 'block';
+                } else {
+                    resultDiv.innerHTML = `<div style="color:red;">${res.data.message || 'Error saving settings.'}</div>`;
+                }
+            })
+            .catch(() => resultDiv.innerHTML = `<div style="color:red;">AJAX request failed.</div>`);
     });
 
     // Back button
-    backBtn.addEventListener('click', function() {
+    backBtn.addEventListener('click', () => {
         step2.style.display = 'none';
         step1.style.display = 'block';
     });
 
-    // Step 2: Start Import button
-  form.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const skipNewProducts = (document.querySelector('input[name="skip_new_products"]:checked')?.value === 'yes') || false;
-        const existingProducts = (document.querySelector('input[name="existing_products"]:checked')?.value === 'update') || false;
-        const emptyValues = (document.querySelector('input[name="empty_values"]:checked')?.value === 'update') || false;
-        const nonce = document.querySelector('input[name="_wpnonce"]').value;
-
-        const data = new URLSearchParams();
-        data.append('action', 'oopos_save_import_settings');
-        data.append('_wpnonce', nonce);
-        data.append('oopos_skip_new_product', skipNewProducts);
-        data.append('oopos_existing_products', existingProducts);
-        data.append('oopos_empty_values', emptyValues);
-
-        fetch(ooposImportAjax.ajax_url, {
-            method: 'POST',
-            body: data
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.success) {
-                resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">${res.data.message}</div>`;
-                setTimeout(() => { resultDiv.innerHTML = ''; }, 3000);
-                step1.style.display = 'none';
-                step2.style.display = 'block';
-            } else {
-                resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">${res.data.message || 'Error saving settings.'}</div>`;
-            }
-        })
-        .catch(err => {
-            console.error('AJAX Error:', err);
-            resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">AJAX request failed.</div>`;
-        });
-    });
-
-    // Back button
-    backBtn.addEventListener('click', function() {
-        step2.style.display = 'none';
-        step1.style.display = 'block';
-    });
-
-    // ✅ Start Import button
+    // ✅ Step 2 → Start Import
     startImportBtn.addEventListener('click', function() {
         overlay.style.display = 'flex';
         closeBtn.style.display = 'none';
 
-        // Reset step texts and colors
-        [step1Status, step2Status, step3Status].forEach(el => {
-            el.textContent = el.textContent.replace('✅', '⏳').replace('❌', '⏳');
-            el.style.color = '';
+        // Reset overlay steps
+        [step1Status, step2Status, step3Status].forEach(s => {
+            s.textContent = s.textContent.replace('✅', '⏳').replace('❌', '⏳');
+            s.style.color = '';
         });
 
-        // Step 1 → instantly done
+        // Step 1 done immediately
         step1Status.textContent = '✅ Starting import process...';
         step1Status.style.color = 'green';
 
-        // Step 2 → start fetching
+        // Step 2 → fetching
         step2Status.textContent = '⏳ Fetching products...';
         step2Status.style.color = 'blue';
 
         const data = new URLSearchParams();
         data.append('action', 'oopos_start_import_products');
 
-        // Start AJAX call
         fetch(ooposImportAjax.ajax_url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -182,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(res => res.json())
         .then(res => {
             if (res.success) {
-                // Mark Step 2 done
+                // Step 2 done
                 step2Status.textContent = '✅ Products fetched successfully.';
                 step2Status.style.color = 'green';
 
@@ -193,11 +92,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => {
                     step3Status.textContent = '✅ File created successfully.';
                     step3Status.style.color = 'green';
-                    closeBtn.style.display = 'inline-block'; // show close button
+                    closeBtn.style.display = 'inline-block';
                 }, 1000);
 
                 resultDiv.innerHTML = `
-                    <div style="color:green;font-weight:600;margin-top:10px;">
+                    <div style="color:green;">
                         ${res.data.message} <br>
                         File saved at: <a href="${res.data.file}" target="_blank">res.json</a>
                     </div>`;
@@ -208,14 +107,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(err => {
-            console.error('AJAX Error:', err);
+            console.error(err);
             step2Status.textContent = '❌ AJAX request failed.';
             step2Status.style.color = 'red';
             closeBtn.style.display = 'inline-block';
         });
     });
-
-
 
     // Close overlay
     closeBtn.addEventListener('click', function() {
