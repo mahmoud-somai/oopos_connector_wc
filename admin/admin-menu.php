@@ -290,21 +290,7 @@ function oopos_save_extra_attributes() {
 
 
 
-// AJAX handler
-add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
-function oopos_save_import_settings() {
-    check_ajax_referer('oopos_import_nonce', '_wpnonce');
 
-    $skip_new = filter_var($_POST['oopos_skip_new_product'] ?? false, FILTER_VALIDATE_BOOLEAN);
-    $existing_update = filter_var($_POST['oopos_existing_products'] ?? false, FILTER_VALIDATE_BOOLEAN);
-    $empty_update = filter_var($_POST['oopos_empty_values'] ?? false, FILTER_VALIDATE_BOOLEAN);
-
-    update_option('oopos_skip_new_product', $skip_new);
-    update_option('oopos_existing_products', $existing_update);
-    update_option('oopos_empty_values', $empty_update);
-
-    wp_send_json_success(['message' => 'Import settings saved successfully!']);
-}
 
 
 }

@@ -1,4 +1,3 @@
-console.log('DOM loaded');
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('oopos-import-form');
     const resultDiv = document.getElementById('import-result');
