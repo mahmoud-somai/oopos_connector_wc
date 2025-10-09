@@ -104,27 +104,65 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Step 2: Start Import button
-jQuery(document).ready(function ($) {
-    const overlay = $('#oopos-overlay');
-    const closeBtn = $('#close-overlay-btn');
+ startImportBtn.addEventListener('click', function() {
+        overlay.style.display = 'flex';
+        closeBtn.style.display = 'none';
 
-    $('#start-import-btn').on('click', function () {
-        overlay.fadeIn(300); // show overlay
-        $('#step1').text('✅ Starting import process...');
-        
-        // simulate steps or replace with AJAX
-        setTimeout(() => $('#step2').text('✅ Fetching products...'), 1000);
-        setTimeout(() => $('#step3').text('✅ Products fetched successfully!'), 2000);
-        setTimeout(() => {
-            $('#step4').text('✅ File created successfully!');
-            closeBtn.show();
-        }, 3000);
+        // Reset steps UI
+        [step1Status, step2Status, step3Status, step4Status].forEach(el => {
+            el.textContent = el.textContent.replace('✅', '⏳').replace('❌', '⏳');
+            el.style.color = '';
+        });
+
+        // Animate step 1
+        step1Status.textContent = '✅ Starting import process...';
+
+        const data = new URLSearchParams();
+        data.append('action', 'oopos_start_import_products');
+
+        fetch(ooposImportAjax.ajax_url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: data.toString()
+        })
+        .then(res => res.json())
+        .then(res => {
+            // Step 2
+            step2Status.textContent = '✅ Fetching products...';
+
+            if (res.success) {
+                // Step 3
+                step3Status.textContent = '✅ Products fetched successfully.';
+                step3Status.style.color = 'green';
+
+                // Step 4 (file)
+                setTimeout(() => {
+                    step4Status.textContent = '✅ File created successfully.';
+                    step4Status.style.color = 'green';
+                    closeBtn.style.display = 'inline-block';
+                }, 1000);
+
+                resultDiv.innerHTML = `
+                    <div style="color:green;font-weight:600;margin-top:10px;">
+                        ${res.data.message} <br>
+                        File saved at: <a href="${res.data.file}" target="_blank">res.json</a>
+                    </div>`;
+            } else {
+                step3Status.textContent = `❌ ${res.data.message || 'Error importing products.'}`;
+                step3Status.style.color = 'red';
+                closeBtn.style.display = 'inline-block';
+            }
+        })
+        .catch(err => {
+            console.error('AJAX Error:', err);
+            step3Status.textContent = '❌ AJAX request failed.';
+            step3Status.style.color = 'red';
+            closeBtn.style.display = 'inline-block';
+        });
     });
 
-    closeBtn.on('click', function () {
-        overlay.fadeOut(300);
-    });
-});
 
 
     // Close overlay
