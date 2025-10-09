@@ -99,6 +99,7 @@ add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_e
 
 function oopos_start_import_products_external_sql() {
    $connector_data = get_option('oopos_connector_data');
+   $connector_selected_data=get_option('oopos-shops-selected')
 
     if (
         !is_array($connector_data) ||
@@ -114,9 +115,22 @@ function oopos_start_import_products_external_sql() {
     $enseigne = trim($connector_data['enseigne'], "'\"");
     $api_key  = trim($connector_data['api_key'], "'\"");
 
+    $shops = maybe_unserialize($connector_selected_data); // returns array like ['AZUR CITY','DEPOT']
+    $escaped_shops = array_map('esc_sql', $shops);
+    $in_list = "'" . implode("','", $escaped_shops) . "'";
+
+    if (empty($shops) || !is_array($shops)) {
+        wp_send_json_error(['message' => 'No shops selected.']);
+    }
+
+
     // ✅ Build the dynamic API URL
     $api_url = $domain . 'api/v2/query.do?enseigne=' . urlencode($enseigne) . '&api-key=' . urlencode($api_key);
-    $sql_query = trim("SELECT * FROM produits WHERE ecommerce=1;");
+    $sql_query = trim("SELECT * 
+    FROM produits p 
+    JOIN stocks s ON p.Produit = s.Produit 
+    WHERE s.Magasin IN ($in_list) 
+    AND ecommerce=1;");
 
     // ✅ Prepare request arguments
     $args = [
