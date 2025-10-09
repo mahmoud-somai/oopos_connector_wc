@@ -299,13 +299,24 @@ add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
 function oopos_save_import_settings() {
     check_ajax_referer('oopos_import_nonce', '_wpnonce');
 
+    // Get values
     $skip_new_products = sanitize_text_field($_POST['skip_new_products'] ?? 'no');
-    $skip_new_products_bool = ($skip_new_products === 'yes') ? true : false;
+    $existing_products = sanitize_text_field($_POST['existing_products'] ?? 'skip');
+    $empty_values = sanitize_text_field($_POST['empty_values'] ?? 'skip');
 
+    // Convert to boolean
+    $skip_new_products_bool = ($skip_new_products === 'yes');
+    $existing_products_bool = ($existing_products === 'update');
+    $empty_values_bool = ($empty_values === 'update');
+
+    // Save in WordPress options
     update_option('oopos_skip_new_product', $skip_new_products_bool);
+    update_option('oopos_existing_products', $existing_products_bool);
+    update_option('oopos_empty_values', $empty_values_bool);
 
     wp_send_json_success(['message' => 'Import settings saved successfully!']);
 }
+
 }
 
 

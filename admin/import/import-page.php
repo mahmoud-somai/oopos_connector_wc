@@ -11,10 +11,11 @@ wp_enqueue_style(
     array(),
     '1.0'
 );
-// Get saved options to preselect values
-$skip_new_product = get_option('oopos_skip_new_product', false);
-$existing_products = get_option('oopos_existing_products', 'skip');
-$empty_values = get_option('oopos_empty_values', 'skip');
+
+// Get saved boolean options
+$skip_new_product = get_option('oopos_skip_new_product', false); // true if "Yes"
+$existing_products = get_option('oopos_existing_products', false); // true if "Update them"
+$empty_values = get_option('oopos_empty_values', false); // true if "Update them"
 ?>
 
 <div class="wrap import-wrapper">
@@ -43,10 +44,10 @@ $empty_values = get_option('oopos_empty_values', 'skip');
                 <label class="section-label">Product imported already:</label>
                 <div class="options-row">
                     <label>
-                        <input type="radio" name="existing_products" value="skip" <?php checked($existing_products, 'skip'); ?>> Skip
+                        <input type="radio" name="existing_products" value="skip" <?php checked($existing_products, false); ?>> Skip
                     </label>
                     <label>
-                        <input type="radio" name="existing_products" value="update" <?php checked($existing_products, 'update'); ?>> Update them
+                        <input type="radio" name="existing_products" value="update" <?php checked($existing_products, true); ?>> Update them
                     </label>
                 </div>
             </div>
@@ -56,10 +57,10 @@ $empty_values = get_option('oopos_empty_values', 'skip');
                 <label class="section-label">Product contains empty values:</label>
                 <div class="options-row">
                     <label>
-                        <input type="radio" name="empty_values" value="skip" <?php checked($empty_values, 'skip'); ?>> Skip
+                        <input type="radio" name="empty_values" value="skip" <?php checked($empty_values, false); ?>> Skip
                     </label>
                     <label>
-                        <input type="radio" name="empty_values" value="update" <?php checked($empty_values, 'update'); ?>> Update them
+                        <input type="radio" name="empty_values" value="update" <?php checked($empty_values, true); ?>> Update them
                     </label>
                 </div>
             </div>
