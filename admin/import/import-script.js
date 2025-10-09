@@ -79,60 +79,64 @@ document.addEventListener('DOMContentLoaded', function() {
     /* --------------------
        STEP 3: Start Import
     -------------------- */
-startImportBtn.addEventListener('click', function() {
-    overlay.style.display = 'flex';
-    closeBtn.style.display = 'none';
+    startImportBtn.addEventListener('click', function() {
+        overlay.style.display = 'flex';
+        closeBtn.style.display = 'none';
 
-    // Reset steps UI
-    [step1Status, step2Status, step3Status].forEach(el => {
-        el.textContent = el.textContent.replace('✅', '⏳').replace('❌', '⏳');
-        el.style.color = '';
-    });
+        // Reset steps UI
+        [step1Status, step2Status, step3Status, step4Status].forEach(el => {
+            el.textContent = el.textContent.replace('✅', '⏳').replace('❌', '⏳');
+            el.style.color = '';
+        });
 
-    // Step 1
-    step1Status.textContent = '✅ Starting import process...';
+        // Animate step 1
+        step1Status.textContent = '✅ Starting import process...';
 
-    const data = new URLSearchParams();
-    data.append('action', 'oopos_start_import_products');
+        const data = new URLSearchParams();
+        data.append('action', 'oopos_start_import_products');
 
-    fetch(ooposImportAjax.ajax_url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: data.toString()
-    })
-    .then(res => res.json())
-    .then(res => {
-        // Step 2
-        step2Status.textContent = '✅ Fetching products...';
+        fetch(ooposImportAjax.ajax_url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: data.toString()
+        })
+        .then(res => res.json())
+        .then(res => {
+            // Step 2
+            step2Status.textContent = '✅ Fetching products...';
 
-        if (res.success) {
-            // Step 3 (final)
-            setTimeout(() => {
-                step3Status.textContent = '✅ File created successfully.';
+            if (res.success) {
+                // Step 3
+                step3Status.textContent = '✅ Products fetched successfully.';
                 step3Status.style.color = 'green';
-                closeBtn.style.display = 'inline-block';
-            }, 800);
 
-            resultDiv.innerHTML = `
-                <div style="color:green;font-weight:600;margin-top:10px;">
-                    ${res.data.message} <br>
-                    File saved at: <a href="${res.data.file}" target="_blank">res.json</a>
-                </div>`;
-        } else {
-            step3Status.textContent = `❌ ${res.data.message || 'Error importing products.'}`;
+                // Step 4 (file)
+                setTimeout(() => {
+                    step4Status.textContent = '✅ File created successfully.';
+                    step4Status.style.color = 'green';
+                    closeBtn.style.display = 'inline-block';
+                }, 1000);
+
+                resultDiv.innerHTML = `
+                    <div style="color:green;font-weight:600;margin-top:10px;">
+                        ${res.data.message} <br>
+                        File saved at: <a href="${res.data.file}" target="_blank">res.json</a>
+                    </div>`;
+            } else {
+                step3Status.textContent = `❌ ${res.data.message || 'Error importing products.'}`;
+                step3Status.style.color = 'red';
+                closeBtn.style.display = 'inline-block';
+            }
+        })
+        .catch(err => {
+            console.error('AJAX Error:', err);
+            step3Status.textContent = '❌ AJAX request failed.';
             step3Status.style.color = 'red';
             closeBtn.style.display = 'inline-block';
-        }
-    })
-    .catch(err => {
-        console.error('AJAX Error:', err);
-        step3Status.textContent = '❌ AJAX request failed.';
-        step3Status.style.color = 'red';
-        closeBtn.style.display = 'inline-block';
+        });
     });
-});
 
     /* --------------------
        CLOSE OVERLAY

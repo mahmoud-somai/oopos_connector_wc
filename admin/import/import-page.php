@@ -66,7 +66,8 @@ $empty_values = (bool) get_option('oopos_empty_values', false);
         <ul id="oopos-progress-list">
             <li id="step1">⏳ Starting import process...</li>
             <li id="step2">⏳ Fetching products...</li>
-            <li id="step3">⏳ Waiting for file creation...</li>
+            <li id="step3">⏳ Waiting for products fetch success...</li>
+            <li id="step4">⏳ Waiting for file creation...</li>
         </ul>
         <button id="close-overlay-btn" style="display:none;" class="button button-primary">Close</button>
     </div>
