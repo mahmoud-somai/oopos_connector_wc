@@ -1,16 +1,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('oopos-import-form');
     const resultDiv = document.getElementById('import-result');
+
     if (!form) return;
 
+    const step1 = form.querySelector('[data-step="1"]');
+    const step2 = form.querySelector('[data-step="2"]');
+    const backBtn = document.getElementById('back-btn');
+    const startImportBtn = document.getElementById('start-import-btn');
+
+    // Step 1: Save settings
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Read each radio, default to false if nothing selected
         const skipNewProducts = (document.querySelector('input[name="skip_new_products"]:checked')?.value === 'yes') || false;
         const existingProducts = (document.querySelector('input[name="existing_products"]:checked')?.value === 'update') || false;
         const emptyValues = (document.querySelector('input[name="empty_values"]:checked')?.value === 'update') || false;
-
         const nonce = document.querySelector('input[name="_wpnonce"]').value;
 
         const data = new URLSearchParams();
@@ -19,13 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
         data.append('oopos_skip_new_product', skipNewProducts);
         data.append('oopos_existing_products', existingProducts);
         data.append('oopos_empty_values', emptyValues);
-                // Log the values being sent
-        console.log('Sending AJAX data:', {
-            skipNewProducts,
-            existingProducts,
-            emptyValues,
-            nonce
-        });
+
+        console.log('Sending AJAX data:', {skipNewProducts, existingProducts, emptyValues, nonce});
 
         fetch(ooposImportAjax.ajax_url, {
             method: 'POST',
@@ -33,13 +33,13 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(res => res.json())
         .then(res => {
- if (res.success) {
+            if (res.success) {
                 resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">${res.data.message}</div>`;
+                setTimeout(() => { resultDiv.innerHTML = ''; }, 3000);
 
-                // Hide message after 3 seconds
-                setTimeout(() => {
-                    resultDiv.innerHTML = '';
-                }, 3000);
+                // Move to Step 2
+                step1.style.display = 'none';
+                step2.style.display = 'block';
             } else {
                 resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">${res.data.message || 'Error saving settings.'}</div>`;
             }
@@ -48,5 +48,16 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('AJAX Error:', err);
             resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">AJAX request failed.</div>`;
         });
+    });
+
+    // Step 2: Back button
+    backBtn.addEventListener('click', function() {
+        step2.style.display = 'none';
+        step1.style.display = 'block';
+    });
+
+    // Step 2: Start Import button
+    startImportBtn.addEventListener('click', function() {
+        alert('Start importing products...'); // Replace with actual import AJAX logic
     });
 });
