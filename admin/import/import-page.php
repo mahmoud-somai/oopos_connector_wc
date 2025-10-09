@@ -2,9 +2,10 @@
 if (!defined('ABSPATH')) exit;
 
 // Get saved options
-$skip_new_product = get_option('oopos_skip_new_product', false);
-$existing_products = get_option('oopos_existing_products', false);
-$empty_values = get_option('oopos_empty_values', false);
+$skip_new_product = (bool) get_option('oopos_skip_new_product', false);
+$existing_products = (bool) get_option('oopos_existing_products', false);
+$empty_values = (bool) get_option('oopos_empty_values', false);
+
 ?>
 
 <div class="wrap import-wrapper">
