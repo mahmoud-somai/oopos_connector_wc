@@ -19,7 +19,8 @@ $empty_values = get_option('oopos_empty_values', false);
     <h1 class="import-title">Start Importing Products from OOPOS</h1>
 
     <div class="oopos-import-card">
-        <form id="oopos-import-form">
+        <form id="oopos-import-form" onsubmit="return false;">
+
             <?php wp_nonce_field('oopos_import_nonce', '_wpnonce'); ?>
 
             <!-- Skip Import of New Products -->

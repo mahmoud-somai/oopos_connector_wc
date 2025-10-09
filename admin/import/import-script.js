@@ -1,11 +1,12 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('oopos-import-form');
     const result = document.getElementById('import-result');
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault(); // stop normal navigation
+    if (!form) return;
 
-        // get boolean values
+    form.addEventListener('submit', function (e) {
+        e.preventDefault(); // stop normal form submit
+
         const skipNew = form.querySelector('input[name="skip_new_products"]:checked').value === 'yes';
         const existingUpdate = form.querySelector('input[name="existing_products"]:checked').value === 'update';
         const emptyUpdate = form.querySelector('input[name="empty_values"]:checked').value === 'update';
