@@ -89,15 +89,60 @@ function oopos_save_import_settings() {
 }
 
 // Handle AJAX: Start Import Products
-add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_external');
+add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_external_sql');
 
-function oopos_start_import_products_external() {
-     $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
+function oopos_start_import_products_external_sql() {
+    // The external API endpoint that can execute SQL queries
+    $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
 
-    // Fetch external API
-    $response = wp_remote_get($api_url, [
-        'timeout' => 30,
-        'headers' => ['Accept' => 'application/json'],
+    // Your SQL query
+    $sql_query = "
+        SELECT
+            Produit,
+            Designation,
+            Saison,
+            Rayon,
+            Famille,
+            SousFamille,
+            Marque,
+            Collection,
+            Modele,
+            Matiere,
+            Decimales_Quantite,
+            Unite,
+            Conditionnement_Achat,
+            Conditionnement_Vente,
+            Utilisateur_Creation,
+            Utilisateur_Modification,
+            Descriptif,
+            ecommerce,
+            Serialise,
+            Lien_Externe,
+            Actif,
+            Fournisseur,
+            cumul_achat_quantite,
+            cumul_achat_valeur,
+            smart_show,
+            Exclure_Fidelite,
+            Cle_mep,
+            Tags,
+            Emplacement,
+            ecommerce
+        FROM produits
+        WHERE ecommerce=1;
+    ";
+
+    // Send GET request to external endpoint with the SQL query
+    // (some APIs require POST, adjust accordingly)
+    $response = wp_remote_post($api_url, [
+        'timeout' => 60,
+        'headers' => [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ],
+        'body' => json_encode([
+            'query' => $sql_query
+        ]),
     ]);
 
     if (is_wp_error($response)) {
@@ -111,39 +156,22 @@ function oopos_start_import_products_external() {
         wp_send_json_error(['message' => 'Invalid JSON response from API.']);
     }
 
-    // Columns to "SELECT"
-    $columns = [
-        'Produit', 'Designation', 'Saison', 'Rayon', 'Famille', 'SousFamille', 'Marque',
-        'Collection', 'Modele', 'Matiere', 'Decimales_Quantite', 'Unite', 'Conditionnement_Achat',
-        'Conditionnement_Vente', 'Utilisateur_Creation', 'Utilisateur_Modification', 'Descriptif',
-        'ecommerce', 'Serialise', 'Lien_Externe', 'Actif', 'Fournisseur', 'cumul_achat_quantite',
-        'cumul_achat_valeur', 'smart_show', 'Exclure_Fidelite', 'Cle_mep', 'Tags', 'Emplacement'
-    ];
-
-    // Filter and pick only the columns for ecommerce=1
-    $filtered = array_filter($data, function($item) {
-        return isset($item['ecommerce']) && $item['ecommerce'] == 1;
-    });
-
-    $result = array_map(function($item) use ($columns) {
-        return array_intersect_key($item, array_flip($columns));
-    }, $filtered);
-
-    // Save to JSON file
+    // Save response to res.json
     $upload_dir = wp_upload_dir();
     $file_path = $upload_dir['basedir'] . '/res.json';
     $file_url = $upload_dir['baseurl'] . '/res.json';
 
-    $json_data = wp_json_encode(array_values($result), JSON_PRETTY_PRINT);
+    $json_data = wp_json_encode($data, JSON_PRETTY_PRINT);
 
     if (file_put_contents($file_path, $json_data) === false) {
         wp_send_json_error(['message' => 'Failed to write JSON file.']);
     }
 
     wp_send_json_success([
-        'message' => 'Products selected and saved successfully!',
+        'message' => 'Query executed and file saved successfully!',
         'file' => $file_url
     ]);
 }
+
 
 
