@@ -9,20 +9,7 @@ function oopos_connector_admin_assets($hook) {
     // JS
     wp_enqueue_script('oopos-connector-admin-js', plugin_dir_url(__FILE__) . 'admin-scripts.js', array('jquery'), false, true);
 
-    wp_enqueue_script(
-            'oopos-import-script',
-            plugin_dir_url(__FILE__) . './import/import-script.js', // correct path from admin-menu.php
-            array('jquery'), // no dependency for vanilla JS
-            '1.0',
-            true // footer
-        );
 
-            wp_enqueue_style(
-            'oopos-import-style',
-            plugin_dir_url(__FILE__) . './import/import-style.css',
-            array(),
-            '1.0'
-        );
         // Get existing WC attributes
     $wc_attributes = array();
     if (function_exists('wc_get_attribute_taxonomies')) {
@@ -53,3 +40,34 @@ function oopos_connector_admin_assets($hook) {
 
     
 }
+
+// Enqueue scripts and styles for the import page
+add_action('admin_enqueue_scripts', 'oopos_enqueue_admin_scripts');
+function oopos_enqueue_admin_scripts($hook) {
+    $screen = get_current_screen();
+    if ($screen->id !== 'oopos-connector_page_oopos-connector-import') return;
+    
+        // CSS
+        wp_enqueue_style(
+            'oopos-import-style',
+            plugin_dir_url(__FILE__) . './import/import-style.css',
+            array(),
+            '1.0'
+        );
+
+        // JS
+        wp_enqueue_script(
+            'oopos-import-script',
+            plugin_dir_url(__FILE__) . './import/import-script.js', // correct path from admin-menu.php
+            array('jquery'), // no dependency for vanilla JS
+            '1.0',
+            true // footer
+        );
+
+        // pass AJAX URL and nonce
+        wp_localize_script('oopos-import-script', 'ooposImportAjax', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('oopos_import_nonce')
+        ));
+    }
+

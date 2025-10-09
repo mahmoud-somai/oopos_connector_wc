@@ -289,7 +289,6 @@ function oopos_save_extra_attributes() {
 // ==========================
 
 
-    
 
 // AJAX handler
 add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
