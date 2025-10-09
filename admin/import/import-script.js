@@ -1,16 +1,15 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
+
     const form = document.getElementById('oopos-import-form');
-    const result = document.getElementById('import-result');
+    const resultDiv = document.getElementById('import-result');
 
-    if (!form) return;
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
 
-    form.addEventListener('submit', function (e) {
-        e.preventDefault(); // stop normal form submit
-
-        const skipNew = form.querySelector('input[name="skip_new_products"]:checked').value === 'yes';
-        const existingUpdate = form.querySelector('input[name="existing_products"]:checked').value === 'update';
-        const emptyUpdate = form.querySelector('input[name="empty_values"]:checked').value === 'update';
-        const nonce = form.querySelector('input[name="_wpnonce"]').value;
+        const skipNew = document.querySelector('input[name="skip_new_products"]:checked').value === 'yes';
+        const existingUpdate = document.querySelector('input[name="existing_products"]:checked').value === 'update';
+        const emptyUpdate = document.querySelector('input[name="empty_values"]:checked').value === 'update';
+        const nonce = document.querySelector('input[name="_wpnonce"]').value;
 
         const data = new FormData();
         data.append('action', 'oopos_save_import_settings');
@@ -21,20 +20,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
         fetch(ooposImportAjax.ajax_url, {
             method: 'POST',
-            credentials: 'same-origin',
-            body: data
+            body: data,
+            credentials: 'same-origin'
         })
         .then(response => response.json())
-        .then(res => {
-            if(res.success) {
-                result.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">${res.data.message}</div>`;
+        .then(resp => {
+            if (resp.success) {
+                resultDiv.innerHTML = `<div style="color:green;font-weight:600;margin-top:10px;">${resp.data.message}</div>`;
             } else {
-                result.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">${res.data.message || 'Error saving settings.'}</div>`;
+                resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">${resp.data.message || 'Error saving settings.'}</div>`;
             }
         })
         .catch(err => {
-            console.error(err);
-            result.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">AJAX request failed</div>`;
+            console.error('AJAX error', err);
+            resultDiv.innerHTML = `<div style="color:red;font-weight:600;margin-top:10px;">AJAX request failed. Check console.</div>`;
         });
     });
+
 });

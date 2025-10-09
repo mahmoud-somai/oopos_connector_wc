@@ -1,11 +1,10 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit;
-}
+if (!defined('ABSPATH')) exit;
+
 wp_enqueue_style(
     'oopos-import-style',
     plugin_dir_url(__FILE__) . 'import-style.css',
-    array(),
+    [],
     '1.0'
 );
 
@@ -19,11 +18,10 @@ $empty_values = get_option('oopos_empty_values', false);
     <h1 class="import-title">Start Importing Products from OOPOS</h1>
 
     <div class="oopos-import-card">
-        <form id="oopos-import-form" onsubmit="return false;">
+        <form id="oopos-import-form">
 
             <?php wp_nonce_field('oopos_import_nonce', '_wpnonce'); ?>
 
-            <!-- Skip Import of New Products -->
             <div class="form-section">
                 <label class="section-label">Skip import of new products:</label>
                 <div class="options-row">
@@ -32,7 +30,6 @@ $empty_values = get_option('oopos_empty_values', false);
                 </div>
             </div>
 
-            <!-- Product Already Imported -->
             <div class="form-section">
                 <label class="section-label">Product imported already:</label>
                 <div class="options-row">
@@ -41,7 +38,6 @@ $empty_values = get_option('oopos_empty_values', false);
                 </div>
             </div>
 
-            <!-- Product Contains Empty Values -->
             <div class="form-section">
                 <label class="section-label">Product contains empty values:</label>
                 <div class="options-row">
