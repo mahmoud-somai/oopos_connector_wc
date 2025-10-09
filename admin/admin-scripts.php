@@ -92,16 +92,12 @@ function oopos_save_import_settings() {
 add_action('wp_ajax_oopos_start_import_products', 'oopos_start_import_products_external');
 
 function oopos_start_import_products_external() {
-    // Replace with your real API URL
     $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
 
-
-    // Get data from external API
+    // Fetch external API
     $response = wp_remote_get($api_url, [
         'timeout' => 30,
-        'headers' => [
-            'Accept' => 'application/json',
-        ],
+        'headers' => ['Accept' => 'application/json'],
     ]);
 
     if (is_wp_error($response)) {
@@ -115,12 +111,13 @@ function oopos_start_import_products_external() {
         wp_send_json_error(['message' => 'Invalid JSON response from API.']);
     }
 
-    // Filter for magasin = 'web' and ecommerce = 1
+    // === SQL SELECT simulation ===
+    // Remove magasin filter, keep only ecommerce=1 if needed
     $filtered = array_filter($data, function($item) {
-        return isset($item['magasin'], $item['ecommerce']) && $item['magasin'] === 'web' && $item['ecommerce'] == 1;
+        return isset($item['ecommerce']) && $item['ecommerce'] == 1;
     });
 
-    // Save to JSON file in uploads folder
+    // Save filtered data to JSON
     $upload_dir = wp_upload_dir();
     $file_path = $upload_dir['basedir'] . '/res.json';
     $file_url = $upload_dir['baseurl'] . '/res.json';
@@ -132,7 +129,7 @@ function oopos_start_import_products_external() {
     }
 
     wp_send_json_success([
-        'message' => 'Products imported successfully from external API!',
+        'message' => 'Products filtered and saved successfully!',
         'file' => $file_url
     ]);
 }
