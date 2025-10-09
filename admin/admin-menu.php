@@ -300,7 +300,7 @@ add_action('admin_enqueue_scripts', function($hook) {
         // CSS
         wp_enqueue_style(
             'oopos-import-style',
-            plugin_dir_url(__FILE__) . 'import/import-style.css',
+            plugin_dir_url(__FILE__) . './import/import-style.css',
             [],
             '1.0'
         );
@@ -308,7 +308,7 @@ add_action('admin_enqueue_scripts', function($hook) {
         // JS (vanilla)
         wp_enqueue_script(
             'oopos-import-script',
-            plugin_dir_url(__FILE__) . 'import/import-script.js',
+            plugin_dir_url(__FILE__) . './import/import-script.js',
             [],
             '1.0',
             true
