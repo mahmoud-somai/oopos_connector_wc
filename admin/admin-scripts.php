@@ -96,36 +96,7 @@ function oopos_start_import_products_external_sql() {
     $api_url = 'https://api.oopos.fr/api/v2/import-produits.do?enseigne=DEMO_MABOUTIQUE&api-key=124d24ff60d642035a4aff3da5a89de4';
 
     // Your SQL query
-    $sql_query = " SELECT Produit,
-            Designation,
-            Saison,
-            Rayon,
-            Famille,
-            SousFamille,
-            Marque,
-            Collection,
-            Modele,
-            Matiere,
-            Decimales_Quantite,
-            Unite,
-            Conditionnement_Achat,
-            Conditionnement_Vente,
-            Utilisateur_Creation,
-            Utilisateur_Modification,
-            Descriptif,
-            ecommerce,
-            Serialise,
-            Lien_Externe,
-            Actif,
-            Fournisseur,
-            cumul_achat_quantite,
-            cumul_achat_valeur,
-            smart_show,
-            Exclure_Fidelite,
-            Cle_mep,
-            Tags,
-            Emplacement,
-            ecommerce
+    $sql_query = " SELECT Produit,Designation,Saison,Rayon,Famille,SousFamille,Marque,Collection,Modele,Matiere,Decimales_Quantite,Unite,Conditionnement_Achat,Conditionnement_Vente,Utilisateur_Creation,Utilisateur_Modification,Descriptif,ecommerce,Serialise,Lien_Externe,Actif,Fournisseur,cumul_achat_quantite,cumul_achat_valeur,smart_show,Exclure_Fidelite,Cle_mep,Tags,Emplacement,ecommerce
         FROM produits
         WHERE ecommerce=1;
     ";
