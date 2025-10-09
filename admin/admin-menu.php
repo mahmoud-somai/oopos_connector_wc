@@ -330,21 +330,32 @@ function oopos_enqueue_admin_scripts( $hook ) {
 
 add_action('wp_ajax_oopos_save_import_settings', 'oopos_save_import_settings');
 function oopos_save_import_settings() {
+    // nonce param name in our JS is `_wpnonce`
     check_ajax_referer('oopos_import_nonce', '_wpnonce');
 
-    // Get boolean values directly from JS (true/false as strings)
-    $skip_new_products_bool = filter_var($_POST['oopos_skip_new_product'] ?? false, FILTER_VALIDATE_BOOLEAN);
-    $existing_products_bool = filter_var($_POST['oopos_existing_products'] ?? false, FILTER_VALIDATE_BOOLEAN);
-    $empty_values_bool = filter_var($_POST['oopos_empty_values'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    // read both string inputs and boolean keyed values (JS sends both to be safe)
+    $skip_new_products_raw = $_POST['skip_new_products'] ?? null;
+    $existing_products_raw = $_POST['existing_products'] ?? null;
+    $empty_values_raw = $_POST['empty_values'] ?? null;
 
-    // Save in WordPress options
-    update_option('oopos_skip_new_product', $skip_new_products_bool);
-    update_option('oopos_existing_products', $existing_products_bool);
-    update_option('oopos_empty_values', $empty_values_bool);
+    // Also accept boolean-flavored keys (sent as booleans)
+    $skip_new_products_bool = isset($_POST['oopos_skip_new_product']) ? filter_var($_POST['oopos_skip_new_product'], FILTER_VALIDATE_BOOLEAN) : null;
+    $existing_products_bool = isset($_POST['oopos_existing_products']) ? filter_var($_POST['oopos_existing_products'], FILTER_VALIDATE_BOOLEAN) : null;
+    $empty_values_bool = isset($_POST['oopos_empty_values']) ? filter_var($_POST['oopos_empty_values'], FILTER_VALIDATE_BOOLEAN) : null;
 
-    wp_send_json_success(['message' => 'Import settings saved successfully!']);
+    // Decide final booleans (preference order: boolean keys > form string keys)
+    $skip_new = is_bool($skip_new_products_bool) ? $skip_new_products_bool : ($skip_new_products_raw === 'yes');
+    $existing_update = is_bool($existing_products_bool) ? $existing_products_bool : ($existing_products_raw === 'update');
+    $empty_update = is_bool($empty_values_bool) ? $empty_values_bool : ($empty_values_raw === 'update');
 
+    // Save in options (booleans)
+    update_option('oopos_skip_new_product', (bool) $skip_new);
+    update_option('oopos_existing_products', (bool) $existing_update);
+    update_option('oopos_empty_values', (bool) $empty_update);
+
+    wp_send_json_success(array('message' => 'Import settings saved successfully'));
 }
+
 
 
 }

@@ -1,21 +1,11 @@
 <?php
 // Security check
-if (!defined('ABSPATH')) {
-    exit;
-}
+if (!defined('ABSPATH')) exit;
 
-// Enqueue the CSS file for this page
-wp_enqueue_style(
-    'oopos-import-style',
-    plugin_dir_url(__FILE__) . 'import-style.css',
-    array(),
-    '1.0'
-);
-
-// Get saved boolean options
-$skip_new_product = get_option('oopos_skip_new_product', false); // true if "Yes"
-$existing_products = get_option('oopos_existing_products', false); // true if "Update them"
-$empty_values = get_option('oopos_empty_values', false); // true if "Update them"
+// Preload boolean values from DB
+$skip_new_product = get_option('oopos_skip_new_product', false); // boolean
+$existing_products = get_option('oopos_existing_products', false); // boolean
+$empty_values = get_option('oopos_empty_values', false); // boolean
 ?>
 
 <div class="wrap import-wrapper">
@@ -23,19 +13,14 @@ $empty_values = get_option('oopos_empty_values', false); // true if "Update them
 
     <div class="oopos-import-card">
         <form id="oopos-import-form" method="post">
-            <input type="hidden" name="action" value="oopos_save_import_settings">
             <?php wp_nonce_field('oopos_import_nonce', '_wpnonce'); ?>
 
             <!-- Skip Import of New Products -->
             <div class="form-section">
                 <label class="section-label">Skip import of new products:</label>
                 <div class="options-row">
-                    <label>
-                        <input type="radio" name="skip_new_products" value="yes" <?php checked($skip_new_product, true); ?>> Yes
-                    </label>
-                    <label>
-                        <input type="radio" name="skip_new_products" value="no" <?php checked($skip_new_product, false); ?>> No
-                    </label>
+                    <label><input type="radio" name="skip_new_products" value="yes" <?php checked($skip_new_product, true); ?>> Yes</label>
+                    <label><input type="radio" name="skip_new_products" value="no" <?php checked($skip_new_product, false); ?>> No</label>
                 </div>
             </div>
 
@@ -43,12 +28,8 @@ $empty_values = get_option('oopos_empty_values', false); // true if "Update them
             <div class="form-section">
                 <label class="section-label">Product imported already:</label>
                 <div class="options-row">
-                    <label>
-                        <input type="radio" name="existing_products" value="skip" <?php checked($existing_products, false); ?>> Skip
-                    </label>
-                    <label>
-                        <input type="radio" name="existing_products" value="update" <?php checked($existing_products, true); ?>> Update them
-                    </label>
+                    <label><input type="radio" name="existing_products" value="skip" <?php checked($existing_products, false); ?>> Skip</label>
+                    <label><input type="radio" name="existing_products" value="update" <?php checked($existing_products, true); ?>> Update them</label>
                 </div>
             </div>
 
@@ -56,12 +37,8 @@ $empty_values = get_option('oopos_empty_values', false); // true if "Update them
             <div class="form-section">
                 <label class="section-label">Product contains empty values:</label>
                 <div class="options-row">
-                    <label>
-                        <input type="radio" name="empty_values" value="skip" <?php checked($empty_values, false); ?>> Skip
-                    </label>
-                    <label>
-                        <input type="radio" name="empty_values" value="update" <?php checked($empty_values, true); ?>> Update them
-                    </label>
+                    <label><input type="radio" name="empty_values" value="skip" <?php checked($empty_values, false); ?>> Skip</label>
+                    <label><input type="radio" name="empty_values" value="update" <?php checked($empty_values, true); ?>> Update them</label>
                 </div>
             </div>
 
