@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const skipNewProducts = document.querySelector('input[name="skip_new_products"]:checked').value === 'yes';
         const existingProducts = document.querySelector('input[name="existing_products"]:checked').value === 'update';
         const emptyValues = document.querySelector('input[name="empty_values"]:checked').value === 'update';
+
         const nonce = document.querySelector('input[name="_wpnonce"]').value;
 
         const data = new URLSearchParams();
